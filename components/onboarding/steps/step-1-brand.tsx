@@ -1,0 +1,110 @@
+"use client"
+
+import type { UseFormReturn } from "react-hook-form"
+import type { OnboardingFormData } from "@/lib/schema"
+import { FormField, FormItem, FormLabel, FormControl, FormDescription } from "@/components/ui/form"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Textarea } from "@/components/ui/textarea"
+import { FileUpload } from "@/components/onboarding/file-upload"
+
+interface StepProps {
+  form: UseFormReturn<OnboardingFormData>
+}
+
+export function Step1Brand({ form }: StepProps) {
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-xl font-semibold mb-1">Brand Assets</h2>
+        <p className="text-sm text-muted-foreground">Upload your team&apos;s brand materials</p>
+      </div>
+
+      <FormField
+        control={form.control}
+        name="logos"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Logos</FormLabel>
+            <FormControl>
+              <FileUpload
+                accept=".svg,.png,.eps"
+                multiple
+                onChange={field.onChange}
+                value={field.value || []}
+                label="Upload logos (SVG, PNG, EPS)"
+              />
+            </FormControl>
+            <FormDescription>Upload multiple logo versions</FormDescription>
+          </FormItem>
+        )}
+      />
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        <FormField
+          control={form.control}
+          name="lightBackgroundVersion"
+          render={({ field }) => (
+            <FormItem className="flex items-start gap-3 space-y-0 p-4 rounded-lg bg-muted/30">
+              <FormControl>
+                <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+              </FormControl>
+              <div>
+                <FormLabel className="cursor-pointer">Light background version included</FormLabel>
+              </div>
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="darkBackgroundVersion"
+          render={({ field }) => (
+            <FormItem className="flex items-start gap-3 space-y-0 p-4 rounded-lg bg-muted/30">
+              <FormControl>
+                <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+              </FormControl>
+              <div>
+                <FormLabel className="cursor-pointer">Dark background version included</FormLabel>
+              </div>
+            </FormItem>
+          )}
+        />
+      </div>
+
+      <FormField
+        control={form.control}
+        name="brandGuidelines"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Brand Guidelines</FormLabel>
+            <FormControl>
+              <FileUpload
+                accept=".pdf"
+                onChange={(files) => field.onChange(files[0])}
+                value={field.value ? [field.value] : []}
+                label="Upload brand guidelines (PDF)"
+              />
+            </FormControl>
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="brandNotes"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Notes on Brand Usage</FormLabel>
+            <FormControl>
+              <Textarea
+                placeholder="Any specific requirements or restrictions for brand usage..."
+                className="min-h-[100px] bg-input"
+                {...field}
+              />
+            </FormControl>
+          </FormItem>
+        )}
+      />
+    </div>
+  )
+}
