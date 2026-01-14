@@ -38,7 +38,22 @@ export function OnboardingForm() {
       photographyTypes: [],
       tracks: [],
       experientialEvents: [],
-      driverName: "",
+      drivers: [
+        {
+          driverName: "",
+          hometown: "",
+          currentResidence: "",
+          birthdate: "",
+          instagram: "",
+          facebook: "",
+          twitter: "",
+          tiktok: "",
+          merchandiseStore: "",
+          driverBio: "",
+          headshot: undefined,
+          heroImage: undefined,
+        },
+      ],
       ownership: [],
       staff: [],
       indycarOnly: false,
@@ -56,7 +71,7 @@ export function OnboardingForm() {
     let fieldsToValidate: (keyof OnboardingFormData)[] = []
 
     if (currentStep === 4) {
-      fieldsToValidate = ["driverName"]
+      fieldsToValidate = ["drivers"]
     } else if (currentStep === 8) {
       fieldsToValidate = ["assetsApproved"]
     }

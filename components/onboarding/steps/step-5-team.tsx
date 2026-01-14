@@ -27,7 +27,7 @@ export function Step5Team({ form }: StepProps) {
         <FormLabel className="mb-3 block">Ownership</FormLabel>
         <RepeatableField
           items={ownership}
-          onAdd={() => form.setValue("ownership", [...ownership, { name: "", title: "", bio: "" }])}
+          onAdd={() => form.setValue("ownership", [...ownership, { name: "", title: "", bio: "", headshot: undefined }])}
           onRemove={(index) =>
             form.setValue(
               "ownership",
@@ -75,6 +75,23 @@ export function Step5Team({ form }: StepProps) {
                   </FormItem>
                 )}
               />
+              <FormField
+                control={form.control}
+                name={`ownership.${index}.headshot`}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Headshot</FormLabel>
+                    <FormControl>
+                      <FileUpload
+                        accept="image/*"
+                        onChange={(files) => field.onChange(files[0])}
+                        value={field.value ? [field.value] : []}
+                        label="Upload headshot on plain background"
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
             </div>
           )}
         />
@@ -87,7 +104,11 @@ export function Step5Team({ form }: StepProps) {
           <FormItem>
             <FormLabel>Team Background</FormLabel>
             <FormControl>
-              <Textarea placeholder="Team history and background..." className="min-h-[120px] bg-input" {...field} />
+              <Textarea
+                placeholder="When the team was formed, where you are based, team history..."
+                className="min-h-[120px] bg-input"
+                {...field}
+              />
             </FormControl>
           </FormItem>
         )}

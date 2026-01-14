@@ -16,7 +16,9 @@ export function Step1Brand({ form }: StepProps) {
     <div className="space-y-6">
       <div>
         <h2 className="text-xl font-semibold mb-1">Brand Assets</h2>
-        <p className="text-sm text-muted-foreground">Upload your team&apos;s brand materials</p>
+        <p className="text-sm text-muted-foreground">
+          Upload logos (SVG, PNG, or EPS) and brand guidelines including color palette and fonts
+        </p>
       </div>
 
       <FormField

@@ -32,7 +32,9 @@ export function Step3Photography({ form }: StepProps) {
     <div className="space-y-6">
       <div>
         <h2 className="text-xl font-semibold mb-1">Photography</h2>
-        <p className="text-sm text-muted-foreground">Upload approved photography and specify types</p>
+        <p className="text-sm text-muted-foreground">
+          Upload fully approved images (PNG, EPS, or SVG) spanning the entire event experience
+        </p>
       </div>
 
       <FormField
@@ -43,11 +45,11 @@ export function Step3Photography({ form }: StepProps) {
             <FormLabel>Approved Event Photography</FormLabel>
             <FormControl>
               <FileUpload
-                accept="image/*"
+                accept="image/*,.eps,.svg"
                 multiple
                 onChange={field.onChange}
                 value={field.value || []}
-                label="Upload approved event photography"
+                label="Upload approved event photography (PNG, EPS, or SVG)"
               />
             </FormControl>
           </FormItem>

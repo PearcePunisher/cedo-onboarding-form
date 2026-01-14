@@ -38,18 +38,25 @@ export const onboardingSchema = z.object({
     .default([]),
 
   // Step 4: Driver
-  driverName: z.string().min(1, "Driver name is required"),
-  hometown: z.string().optional(),
-  currentResidence: z.string().optional(),
-  birthdate: z.string().optional(),
-  instagram: z.string().url().optional().or(z.literal("")),
-  facebook: z.string().url().optional().or(z.literal("")),
-  twitter: z.string().url().optional().or(z.literal("")),
-  tiktok: z.string().url().optional().or(z.literal("")),
-  merchandiseStore: z.string().url().optional().or(z.literal("")),
-  driverBio: z.string().optional(),
-  headshot: z.any().optional(),
-  heroImage: z.any().optional(),
+  drivers: z
+    .array(
+      z.object({
+        driverName: z.string().min(1, "Driver name is required"),
+        hometown: z.string().optional(),
+        currentResidence: z.string().optional(),
+        birthdate: z.string().optional(),
+        instagram: z.string().url().optional().or(z.literal("")),
+        facebook: z.string().url().optional().or(z.literal("")),
+        twitter: z.string().url().optional().or(z.literal("")),
+        tiktok: z.string().url().optional().or(z.literal("")),
+        merchandiseStore: z.string().url().optional().or(z.literal("")),
+        driverBio: z.string().optional(),
+        headshot: z.any().optional(),
+        heroImage: z.any().optional(),
+      }),
+    )
+    .min(1, "At least one driver is required"),
+
 
   // Step 5: Team & Staff
   ownership: z
@@ -58,6 +65,7 @@ export const onboardingSchema = z.object({
         name: z.string(),
         title: z.string().optional(),
         bio: z.string().optional(),
+        headshot: z.any().optional(),
       }),
     )
     .default([]),

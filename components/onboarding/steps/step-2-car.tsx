@@ -17,7 +17,9 @@ export function Step2Car({ form }: StepProps) {
     <div className="space-y-6">
       <div>
         <h2 className="text-xl font-semibold mb-1">Car Information</h2>
-        <p className="text-sm text-muted-foreground">Provide vehicle specifications and images</p>
+        <p className="text-sm text-muted-foreground">
+          Provide chassis, engine, and other specs along with car images (SVG, EPS, or PNG)
+        </p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
