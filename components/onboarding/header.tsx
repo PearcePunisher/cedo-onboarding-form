@@ -13,7 +13,7 @@ export function Header() {
           priority
         />
         <div className="h-6 w-px bg-border" />
-        <span className="text-muted-foreground">Client Onboarding</span>
+        <span className="text-muted-foreground">Client Onboarding Form</span>
       </div>
     </header>
   )
