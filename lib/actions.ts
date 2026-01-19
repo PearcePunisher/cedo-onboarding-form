@@ -1,7 +1,35 @@
 "use server"
 
 import { neon } from "@neondatabase/serverless"
+import { put } from "@vercel/blob"
 import { OnboardingFormData } from "./schema"
+
+async function uploadFiles(files: File[] | null | undefined, prefix: string): Promise<string | null> {
+  if (!files || files.length === 0) return null
+  
+  const uploadedUrls: string[] = []
+  
+  for (const file of files) {
+    if (file instanceof File) {
+      const blob = await put(`${prefix}/${Date.now()}-${file.name}`, file, {
+        access: "public",
+      })
+      uploadedUrls.push(blob.url)
+    }
+  }
+  
+  return uploadedUrls.length > 0 ? JSON.stringify(uploadedUrls) : null
+}
+
+async function uploadSingleFile(file: File | null | undefined, prefix: string): Promise<string | null> {
+  if (!file || !(file instanceof File)) return null
+  
+  const blob = await put(`${prefix}/${Date.now()}-${file.name}`, file, {
+    access: "public",
+  })
+  
+  return blob.url
+}
 
 export async function submitOnboardingForm(data: OnboardingFormData) {
   console.log("Server Action called - starting submission...")
@@ -19,15 +47,13 @@ export async function submitOnboardingForm(data: OnboardingFormData) {
     const referenceId = `CEDO-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`
     console.log("Generated reference ID:", referenceId)
 
-    // Convert File objects and complex data to JSON strings for storage
-    const prepareFileData = (files: any) => {
-      if (!files) return null
-      return JSON.stringify(files.map((file: any) => ({
-        name: file?.name || "unknown",
-        type: file?.type || "unknown",
-        size: file?.size || 0,
-      })))
-    }
+    // Upload files to Vercel Blob Storage
+    console.log("Uploading files to Vercel Blob Storage...")
+    const logosUrls = await uploadFiles(data.logos, `onboarding/${referenceId}/logos`)
+    const brandGuidelinesUrl = await uploadSingleFile(data.brandGuidelines, `onboarding/${referenceId}/brand-guidelines`)
+    const carImagesUrls = await uploadFiles(data.carImages, `onboarding/${referenceId}/car-images`)
+    const eventPhotographyUrls = await uploadFiles(data.eventPhotography, `onboarding/${referenceId}/event-photography`)
+    console.log("Files uploaded successfully")
 
     // Insert main onboarding record
     await sql`
@@ -58,18 +84,18 @@ export async function submitOnboardingForm(data: OnboardingFormData) {
         created_at
       ) VALUES (
         ${referenceId},
-        ${prepareFileData(data.logos)},
+        ${logosUrls},
         ${data.lightBackgroundVersion},
         ${data.darkBackgroundVersion},
-        ${prepareFileData(data.brandGuidelines ? [data.brandGuidelines] : null)},
+        ${brandGuidelinesUrl},
         ${data.brandNotes},
         ${data.chassis},
         ${data.engine},
         ${data.otherSpecifications},
-        ${prepareFileData(data.carImages)},
+        ${carImagesUrls},
         ${data.plainWhiteBackground},
         ${data.multipleAngles},
-        ${prepareFileData(data.eventPhotography)},
+        ${eventPhotographyUrls},
         ${JSON.stringify(data.photographyTypes)},
         ${data.teamBackground},
         ${data.indycarOnly},
@@ -89,6 +115,9 @@ export async function submitOnboardingForm(data: OnboardingFormData) {
     // Insert drivers
     console.log(`Inserting ${data.drivers.length} driver(s)...`)
     for (const driver of data.drivers) {
+      const headshotUrl = await uploadSingleFile(driver.headshot, `onboarding/${referenceId}/drivers/headshots`)
+      const heroImageUrl = await uploadSingleFile(driver.heroImage, `onboarding/${referenceId}/drivers/hero-images`)
+      
       await sql`
         INSERT INTO drivers (
           reference_id,
@@ -116,14 +145,16 @@ export async function submitOnboardingForm(data: OnboardingFormData) {
           ${driver.tiktok},
           ${driver.merchandiseStore},
           ${driver.driverBio},
-          ${prepareFileData(driver.headshot ? [driver.headshot] : null)},
-          ${prepareFileData(driver.heroImage ? [driver.heroImage] : null)}
+          ${headshotUrl},
+          ${heroImageUrl}
         )
       `
     }
 
     // Insert tracks
     for (const track of data.tracks) {
+      const trackImagesUrls = await uploadFiles(track.trackImages, `onboarding/${referenceId}/tracks`)
+      
       await sql`
         INSERT INTO tracks (
           reference_id,
@@ -132,13 +163,15 @@ export async function submitOnboardingForm(data: OnboardingFormData) {
         ) VALUES (
           ${referenceId},
           ${track.trackName},
-          ${prepareFileData(track.trackImages)}
+          ${trackImagesUrls}
         )
       `
     }
 
     // Insert experiential events
     for (const event of data.experientialEvents) {
+      const eventImagesUrls = await uploadFiles(event.images, `onboarding/${referenceId}/experiential-events`)
+      
       await sql`
         INSERT INTO experiential_events (
           reference_id,
@@ -149,13 +182,15 @@ export async function submitOnboardingForm(data: OnboardingFormData) {
           ${referenceId},
           ${event.eventName},
           ${event.description},
-          ${prepareFileData(event.images)}
+          ${eventImagesUrls}
         )
       `
     }
 
     // Insert ownership
     for (const owner of data.ownership) {
+      const headshotUrl = await uploadSingleFile(owner.headshot, `onboarding/${referenceId}/ownership`)
+      
       await sql`
         INSERT INTO ownership (
           reference_id,
@@ -168,13 +203,15 @@ export async function submitOnboardingForm(data: OnboardingFormData) {
           ${owner.name},
           ${owner.title},
           ${owner.bio},
-          ${prepareFileData(owner.headshot ? [owner.headshot] : null)}
+          ${headshotUrl}
         )
       `
     }
 
     // Insert staff
     for (const staffMember of data.staff) {
+      const headshotUrl = await uploadSingleFile(staffMember.headshot, `onboarding/${referenceId}/staff`)
+      
       await sql`
         INSERT INTO staff (
           reference_id,
@@ -191,7 +228,7 @@ export async function submitOnboardingForm(data: OnboardingFormData) {
           ${staffMember.email},
           ${staffMember.mobile},
           ${staffMember.roleOnSite},
-          ${prepareFileData(staffMember.headshot ? [staffMember.headshot] : null)}
+          ${headshotUrl}
         )
       `
     }
