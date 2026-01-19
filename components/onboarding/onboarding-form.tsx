@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { ChevronLeft, ChevronRight, Send } from "lucide-react"
 import { onboardingSchema, type OnboardingFormData } from "@/lib/schema"
+import { submitOnboardingForm } from "@/lib/actions"
 import { Form } from "@/components/ui/form"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -92,22 +93,21 @@ export function OnboardingForm() {
     }
   }
 
-  const onSubmit = (data: OnboardingFormData) => {
+  const onSubmit = async (data: OnboardingFormData) => {
     // Log full payload to console
     console.log("Onboarding Form Submission:", data)
 
-    // Generate mock reference ID
-    const mockRefId = `CEDO-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`
-    setReferenceId(mockRefId)
-    setIsSubmitted(true)
+    // Submit to database
+    const result = await submitOnboardingForm(data)
 
-    // Placeholder for webhook / Strapi integration
-    // TODO: POST to /api/onboarding
-    // fetch('/api/onboarding', {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify(data)
-    // })
+    if (result.success && result.referenceId) {
+      setReferenceId(result.referenceId)
+      setIsSubmitted(true)
+    } else {
+      // Handle error - you might want to show a toast notification
+      console.error("Submission failed:", result.error)
+      alert("Failed to submit form. Please try again.")
+    }
   }
 
   const handleReset = () => {
