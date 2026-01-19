@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { ChevronLeft, ChevronRight, Send } from "lucide-react"
 import { onboardingSchema, type OnboardingFormData } from "@/lib/schema"
-import { submitOnboardingForm } from "@/lib/actions"
+import { submitOnboardingForm } from "../../lib/actions"
 import { Form } from "@/components/ui/form"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -28,6 +28,7 @@ export function OnboardingForm() {
   const [currentStep, setCurrentStep] = useState(1)
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [referenceId, setReferenceId] = useState("")
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const form = useForm<OnboardingFormData>({
     resolver: zodResolver(onboardingSchema),
@@ -94,19 +95,28 @@ export function OnboardingForm() {
   }
 
   const onSubmit = async (data: OnboardingFormData) => {
-    // Log full payload to console
-    console.log("Onboarding Form Submission:", data)
+    try {
+      setIsSubmitting(true)
+      
+      // Log full payload to console
+      console.log("Onboarding Form Submission:", data)
 
-    // Submit to database
-    const result = await submitOnboardingForm(data)
+      // Submit to database
+      const result = await submitOnboardingForm(data)
 
-    if (result.success && result.referenceId) {
-      setReferenceId(result.referenceId)
-      setIsSubmitted(true)
-    } else {
-      // Handle error - you might want to show a toast notification
-      console.error("Submission failed:", result.error)
-      alert("Failed to submit form. Please try again.")
+      if (result.success && result.referenceId) {
+        setReferenceId(result.referenceId)
+        setIsSubmitted(true)
+      } else {
+        // Handle error - you might want to show a toast notification
+        console.error("Submission failed:", result.error)
+        alert("Failed to submit form. Please try again.")
+      }
+    } catch (error) {
+      console.error("Submission error:", error)
+      alert("An error occurred while submitting the form. Please try again.")
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -173,8 +183,8 @@ export function OnboardingForm() {
                 </Button>
 
                 {currentStep === TOTAL_STEPS ? (
-                  <Button type="submit" className="gap-2">
-                    Submit
+                  <Button type="submit" className="gap-2" disabled={isSubmitting}>
+                    {isSubmitting ? "Submitting..." : "Submit"}
                     <Send className="w-4 h-4" />
                   </Button>
                 ) : (

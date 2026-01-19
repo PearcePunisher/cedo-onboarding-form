@@ -4,11 +4,20 @@ import { neon } from "@neondatabase/serverless"
 import { OnboardingFormData } from "./schema"
 
 export async function submitOnboardingForm(data: OnboardingFormData) {
+  console.log("Server Action called - starting submission...")
+  
   try {
-    const sql = neon(process.env.DATABASE_URL!)
+    if (!process.env.DATABASE_URL) {
+      console.error("DATABASE_URL is not defined!")
+      return { success: false, error: "Database configuration error" }
+    }
+
+    const sql = neon(process.env.DATABASE_URL)
+    console.log("Database connection initialized")
 
     // Generate reference ID
     const referenceId = `CEDO-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`
+    console.log("Generated reference ID:", referenceId)
 
     // Convert File objects and complex data to JSON strings for storage
     const prepareFileData = (files: any) => {
@@ -75,7 +84,10 @@ export async function submitOnboardingForm(data: OnboardingFormData) {
       )
     `
 
+    console.log("Main onboarding record inserted successfully")
+
     // Insert drivers
+    console.log(`Inserting ${data.drivers.length} driver(s)...`)
     for (const driver of data.drivers) {
       await sql`
         INSERT INTO drivers (
@@ -199,9 +211,14 @@ export async function submitOnboardingForm(data: OnboardingFormData) {
       `
     }
 
+    console.log("All data inserted successfully!")
     return { success: true, referenceId }
   } catch (error) {
     console.error("Database error:", error)
-    return { success: false, error: "Failed to save onboarding data" }
+    console.error("Error details:", error instanceof Error ? error.message : String(error))
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : "Failed to save onboarding data" 
+    }
   }
 }
