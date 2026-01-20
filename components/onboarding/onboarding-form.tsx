@@ -1,3 +1,5 @@
+// TODO: Move Experiental Events to the page with IndyCar Specific events
+
 "use client"
 
 import { useState } from "react"
@@ -94,9 +96,72 @@ export function OnboardingForm() {
     }
   }
 
+  // Calculate total file size in MB
+  const calculateTotalFileSize = (data: OnboardingFormData): number => {
+    let totalSize = 0
+    
+    const addFileSize = (file: File | File[] | null | undefined) => {
+      if (!file) return
+      if (Array.isArray(file)) {
+        file.forEach(f => { if (f instanceof File) totalSize += f.size })
+      } else if (file instanceof File) {
+        totalSize += file.size
+      }
+    }
+    
+    // Add all file fields
+    addFileSize(data.logos)
+    addFileSize(data.brandGuidelines)
+    addFileSize(data.carImages)
+    addFileSize(data.eventPhotography)
+    
+    data.drivers?.forEach(driver => {
+      addFileSize(driver.headshot)
+      addFileSize(driver.heroImage)
+    })
+    
+    data.tracks?.forEach(track => {
+      addFileSize(track.trackImages)
+    })
+    
+    data.experientialEvents?.forEach(event => {
+      addFileSize(event.images)
+    })
+    
+    data.ownership?.forEach(owner => {
+      addFileSize(owner.headshot)
+    })
+    
+    data.staff?.forEach(staff => {
+      addFileSize(staff.headshot)
+    })
+    
+    return totalSize / (1024 * 1024) // Convert to MB
+  }
+
   const onSubmit = async (data: OnboardingFormData) => {
     try {
       setIsSubmitting(true)
+      
+      // Check total payload size
+      const totalSizeMB = calculateTotalFileSize(data)
+      console.log(`Total file size: ${totalSizeMB.toFixed(2)}MB`)
+      
+      if (totalSizeMB > 9) { // Leave some headroom (10MB limit, warn at 9MB)
+        const proceed = confirm(
+          `Warning: Your total file size is ${totalSizeMB.toFixed(2)}MB, which is near the 10MB limit.\n\n` +
+          `This may cause the submission to fail. Consider:\n` +
+          `• Reducing image file sizes using compression\n` +
+          `• Uploading fewer images\n` +
+          `• Using lower resolution images\n\n` +
+          `Do you want to try submitting anyway?`
+        )
+        
+        if (!proceed) {
+          setIsSubmitting(false)
+          return
+        }
+      }
       
       // Log full payload to console
       console.log("Onboarding Form Submission:", data)
@@ -110,11 +175,29 @@ export function OnboardingForm() {
       } else {
         // Handle error - you might want to show a toast notification
         console.error("Submission failed:", result.error)
-        alert("Failed to submit form. Please try again.")
+        
+        if (result.error?.includes("payload") || result.error?.includes("413") || result.error?.includes("too large")) {
+          alert(
+            "Upload failed: File size too large.\n\n" +
+            `Total size: ${totalSizeMB.toFixed(2)}MB\n\n` +
+            "Please reduce your file sizes and try again."
+          )
+        } else {
+          alert("Failed to submit form. Please try again.")
+        }
       }
     } catch (error) {
       console.error("Submission error:", error)
-      alert("An error occurred while submitting the form. Please try again.")
+      const errorMessage = error instanceof Error ? error.message : String(error)
+      
+      if (errorMessage.includes("payload") || errorMessage.includes("413") || errorMessage.includes("too large")) {
+        alert(
+          "Upload failed: Total file size exceeds the limit.\n\n" +
+          "Please compress your images or upload fewer files."
+        )
+      } else {
+        alert("An error occurred while submitting the form. Please try again.")
+      }
     } finally {
       setIsSubmitting(false)
     }

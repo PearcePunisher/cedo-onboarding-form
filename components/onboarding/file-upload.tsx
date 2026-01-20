@@ -13,35 +13,52 @@ interface FileUploadProps {
   onChange: (files: File[]) => void
   value?: File[]
   label?: string
+  maxSize?: number // in bytes
+  maxSizeMB?: number // for display purposes
 }
 
-export function FileUpload({ accept, multiple = false, onChange, value = [], label }: FileUploadProps) {
+export function FileUpload({ accept, multiple = false, onChange, value = [], label, maxSize = 5 * 1024 * 1024, maxSizeMB = 5 }: FileUploadProps) {
   const [isDragging, setIsDragging] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const validateAndAddFiles = useCallback(
+    (newFiles: File[]) => {
+      setError(null)
+      const oversizedFiles = newFiles.filter(file => file.size > maxSize)
+      
+      if (oversizedFiles.length > 0) {
+        const fileNames = oversizedFiles.map(f => f.name).join(', ')
+        setError(`File(s) too large: ${fileNames}. Maximum size is ${maxSizeMB}MB per file.`)
+        return
+      }
+      
+      if (multiple) {
+        onChange([...value, ...newFiles])
+      } else {
+        onChange(newFiles.slice(0, 1))
+      }
+    },
+    [multiple, onChange, value, maxSize, maxSizeMB],
+  )
 
   const handleDrop = useCallback(
     (e: React.DragEvent) => {
       e.preventDefault()
       setIsDragging(false)
       const files = Array.from(e.dataTransfer.files)
-      if (multiple) {
-        onChange([...value, ...files])
-      } else {
-        onChange(files.slice(0, 1))
-      }
+      validateAndAddFiles(files)
     },
-    [multiple, onChange, value],
+    [validateAndAddFiles],
   )
 
   const handleFileSelect = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const files = Array.from(e.target.files || [])
-      if (multiple) {
-        onChange([...value, ...files])
-      } else {
-        onChange(files.slice(0, 1))
-      }
+      validateAndAddFiles(files)
+      // Reset input so same file can be selected again if needed
+      e.target.value = ''
     },
-    [multiple, onChange, value],
+    [validateAndAddFiles],
   )
 
   const removeFile = useCallback(
@@ -80,8 +97,15 @@ export function FileUpload({ accept, multiple = false, onChange, value = [], lab
           <Upload className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
           <p className="text-sm text-muted-foreground">{label || "Drop files here or click to upload"}</p>
           {accept && <p className="text-xs text-muted-foreground mt-1">Accepted: {accept}</p>}
+          <p className="text-xs text-muted-foreground mt-1">Maximum file size: {maxSizeMB}MB per file</p>
         </label>
       </div>
+
+      {error && (
+        <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20">
+          <p className="text-sm text-destructive">{error}</p>
+        </div>
+      )}
 
       {value.length > 0 && (
         <div className="space-y-2">
