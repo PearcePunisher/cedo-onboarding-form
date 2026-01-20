@@ -105,7 +105,7 @@ export function Step3Photography({ form }: StepProps) {
                   <FormItem>
                     <FormLabel>Track Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g., Indianapolis Motor Speedway" className="bg-input" {...field} />
+                      <Input placeholder="e.g., Indianapolis Motor Speedway" className="bg-input" maxLength={5000} showCharCount {...field} />
                     </FormControl>
                   </FormItem>
                 )}
@@ -156,7 +156,7 @@ export function Step3Photography({ form }: StepProps) {
                   <FormItem>
                     <FormLabel>Event Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="Event name" className="bg-input" {...field} />
+                      <Input placeholder="Event name" className="bg-input" maxLength={5000} showCharCount {...field} />
                     </FormControl>
                   </FormItem>
                 )}
@@ -168,7 +168,7 @@ export function Step3Photography({ form }: StepProps) {
                   <FormItem>
                     <FormLabel>Description</FormLabel>
                     <FormControl>
-                      <Textarea placeholder="Event description" className="bg-input" {...field} />
+                      <Textarea placeholder="Event description" className="bg-input" maxLength={5000} showCharCount {...field} />
                     </FormControl>
                   </FormItem>
                 )}

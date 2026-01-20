@@ -101,6 +101,8 @@ export function Step1Brand({ form }: StepProps) {
               <Textarea
                 placeholder="Any specific requirements or restrictions for brand usage..."
                 className="min-h-[100px] bg-input"
+                maxLength={5000}
+                showCharCount
                 {...field}
               />
             </FormControl>

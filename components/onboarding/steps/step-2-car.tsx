@@ -30,7 +30,7 @@ export function Step2Car({ form }: StepProps) {
             <FormItem>
               <FormLabel>Chassis</FormLabel>
               <FormControl>
-                <Input placeholder="e.g., Dallara DW12" className="bg-input" {...field} />
+                <Input placeholder="e.g., Dallara DW12" className="bg-input" maxLength={5000} showCharCount {...field} />
               </FormControl>
             </FormItem>
           )}
@@ -43,7 +43,7 @@ export function Step2Car({ form }: StepProps) {
             <FormItem>
               <FormLabel>Engine</FormLabel>
               <FormControl>
-                <Input placeholder="e.g., Honda HI24TT" className="bg-input" {...field} />
+                <Input placeholder="e.g., Honda HI24TT" className="bg-input" maxLength={5000} showCharCount {...field} />
               </FormControl>
             </FormItem>
           )}
@@ -57,7 +57,7 @@ export function Step2Car({ form }: StepProps) {
           <FormItem>
             <FormLabel>Other Specifications</FormLabel>
             <FormControl>
-              <Textarea placeholder="Additional car specifications..." className="min-h-[100px] bg-input" {...field} />
+              <Textarea placeholder="Additional car specifications..." className="min-h-[100px] bg-input" maxLength={5000} showCharCount {...field} />
             </FormControl>
           </FormItem>
         )}

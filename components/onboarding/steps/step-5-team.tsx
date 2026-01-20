@@ -57,7 +57,7 @@ export function Step5Team({ form }: StepProps) {
                     <FormItem>
                       <FormLabel>Title</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g., Team Owner" className="bg-input" {...field} />
+                        <Input placeholder="e.g., Team Owner" className="bg-input" maxLength={5000} showCharCount {...field} />
                       </FormControl>
                     </FormItem>
                   )}
@@ -70,7 +70,7 @@ export function Step5Team({ form }: StepProps) {
                   <FormItem>
                     <FormLabel>Bio</FormLabel>
                     <FormControl>
-                      <Textarea placeholder="Brief bio..." className="bg-input" {...field} />
+                      <Textarea placeholder="Brief bio..." className="bg-input" maxLength={5000} showCharCount {...field} />
                     </FormControl>
                   </FormItem>
                 )}
@@ -107,6 +107,8 @@ export function Step5Team({ form }: StepProps) {
               <Textarea
                 placeholder="When the team was formed, where you are based, team history..."
                 className="min-h-[120px] bg-input"
+                maxLength={5000}
+                showCharCount
                 {...field}
               />
             </FormControl>
@@ -138,7 +140,7 @@ export function Step5Team({ form }: StepProps) {
                     <FormItem>
                       <FormLabel>Name</FormLabel>
                       <FormControl>
-                        <Input placeholder="Full name" className="bg-input" {...field} />
+                        <Input placeholder="Full name" className="bg-input" maxLength={5000} showCharCount {...field} />
                       </FormControl>
                     </FormItem>
                   )}
@@ -150,7 +152,7 @@ export function Step5Team({ form }: StepProps) {
                     <FormItem>
                       <FormLabel>Title</FormLabel>
                       <FormControl>
-                        <Input placeholder="Job title" className="bg-input" {...field} />
+                        <Input placeholder="Job title" className="bg-input" maxLength={5000} showCharCount {...field} />
                       </FormControl>
                     </FormItem>
                   )}
@@ -176,7 +178,7 @@ export function Step5Team({ form }: StepProps) {
                     <FormItem>
                       <FormLabel>Mobile</FormLabel>
                       <FormControl>
-                        <Input placeholder="+1 234 567 8900" className="bg-input" {...field} />
+                        <Input placeholder="+1 234 567 8900" className="bg-input" maxLength={5000} showCharCount {...field} />
                       </FormControl>
                     </FormItem>
                   )}
@@ -189,7 +191,7 @@ export function Step5Team({ form }: StepProps) {
                   <FormItem>
                     <FormLabel>Role on Site</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g., Team Manager" className="bg-input" {...field} />
+                      <Input placeholder="e.g., Team Manager" className="bg-input" maxLength={5000} showCharCount {...field} />
                     </FormControl>
                   </FormItem>
                 )}

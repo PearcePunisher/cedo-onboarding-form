@@ -109,6 +109,8 @@ export function Step8Review({ form }: StepProps) {
               <Textarea
                 placeholder="Any additional information or special requests..."
                 className="min-h-[100px] bg-input"
+                maxLength={5000}
+                showCharCount
                 {...field}
               />
             </FormControl>

@@ -59,7 +59,7 @@ export function Step4Driver({ form }: StepProps) {
                     Driver Name <span className="text-destructive">*</span>
                   </FormLabel>
                   <FormControl>
-                    <Input placeholder="Full name" className="bg-input" {...field} />
+                    <Input placeholder="Full name" className="bg-input" maxLength={5000} showCharCount {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -74,7 +74,7 @@ export function Step4Driver({ form }: StepProps) {
                   <FormItem>
                     <FormLabel>Hometown</FormLabel>
                     <FormControl>
-                      <Input placeholder="City, Country" className="bg-input" {...field} />
+                      <Input placeholder="City, Country" className="bg-input" maxLength={5000} showCharCount {...field} />
                     </FormControl>
                   </FormItem>
                 )}
@@ -87,7 +87,7 @@ export function Step4Driver({ form }: StepProps) {
                   <FormItem>
                     <FormLabel>Current Residence</FormLabel>
                     <FormControl>
-                      <Input placeholder="City, Country" className="bg-input" {...field} />
+                      <Input placeholder="City, Country" className="bg-input" maxLength={5000} showCharCount {...field} />
                     </FormControl>
                   </FormItem>
                 )}
@@ -182,7 +182,7 @@ export function Step4Driver({ form }: StepProps) {
                 <FormItem>
                   <FormLabel>Driver Bio</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="Brief biography..." className="min-h-[120px] bg-input" {...field} />
+                    <Textarea placeholder="Brief biography..." className="min-h-[120px] bg-input" maxLength={5000} showCharCount {...field} />
                   </FormControl>
                 </FormItem>
               )}

@@ -61,7 +61,7 @@ export function Step7Faqs({ form }: StepProps) {
                     <FormItem>
                       <FormLabel>Question</FormLabel>
                       <FormControl>
-                        <Input placeholder="Enter question..." className="bg-input" {...field} />
+                        <Input placeholder="Enter question..." className="bg-input" maxLength={5000} showCharCount {...field} />
                       </FormControl>
                     </FormItem>
                   )}
@@ -73,7 +73,7 @@ export function Step7Faqs({ form }: StepProps) {
                     <FormItem>
                       <FormLabel>Answer</FormLabel>
                       <FormControl>
-                        <Textarea placeholder="Enter answer..." className="bg-input" {...field} />
+                        <Textarea placeholder="Enter answer..." className="bg-input" maxLength={5000} showCharCount {...field} />
                       </FormControl>
                     </FormItem>
                   )}
@@ -94,6 +94,8 @@ export function Step7Faqs({ form }: StepProps) {
               <Textarea
                 placeholder="Any special notes or restrictions for FAQs..."
                 className="min-h-[100px] bg-input"
+                maxLength={5000}
+                showCharCount
                 {...field}
               />
             </FormControl>
