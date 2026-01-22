@@ -1,5 +1,3 @@
-// TODO: Move Experiental Events to the page with IndyCar Specific events
-
 "use client"
 
 import { useState } from "react"

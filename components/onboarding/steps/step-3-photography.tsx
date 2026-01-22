@@ -5,7 +5,6 @@ import type { OnboardingFormData } from "@/lib/schema"
 import { FormField, FormItem, FormLabel, FormControl } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Textarea } from "@/components/ui/textarea"
 import { FileUpload } from "@/components/onboarding/file-upload"
 import { RepeatableField } from "@/components/onboarding/repeatable-field"
 
@@ -26,7 +25,6 @@ const photographyTypeOptions = [
 
 export function Step3Photography({ form }: StepProps) {
   const tracks = form.watch("tracks") || []
-  const experientialEvents = form.watch("experientialEvents") || []
 
   return (
     <div className="space-y-6">
@@ -123,69 +121,6 @@ export function Step3Photography({ form }: StepProps) {
                         onChange={field.onChange}
                         value={field.value || []}
                         label="Upload track images"
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-            </div>
-          )}
-        />
-      </div>
-
-      <div>
-        <FormLabel className="mb-3 block">Experiential Events</FormLabel>
-        <RepeatableField
-          items={experientialEvents}
-          onAdd={() =>
-            form.setValue("experientialEvents", [...experientialEvents, { eventName: "", description: "", images: [] }])
-          }
-          onRemove={(index) =>
-            form.setValue(
-              "experientialEvents",
-              experientialEvents.filter((_, i) => i !== index),
-            )
-          }
-          addLabel="Add Event"
-          renderItem={(_, index) => (
-            <div className="space-y-4 pr-8">
-              <FormField
-                control={form.control}
-                name={`experientialEvents.${index}.eventName`}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Event Name</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Event name" className="bg-input" maxLength={5000} showCharCount {...field} />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name={`experientialEvents.${index}.description`}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Description</FormLabel>
-                    <FormControl>
-                      <Textarea placeholder="Event description" className="bg-input" maxLength={5000} showCharCount {...field} />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name={`experientialEvents.${index}.images`}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Event Images</FormLabel>
-                    <FormControl>
-                      <FileUpload
-                        accept="image/*"
-                        multiple
-                        onChange={field.onChange}
-                        value={field.value || []}
-                        label="Upload event images"
                       />
                     </FormControl>
                   </FormItem>
