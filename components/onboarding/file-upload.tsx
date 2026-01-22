@@ -22,8 +22,10 @@ export function FileUpload({ accept, multiple = false, onChange, value = [], lab
   const [isDragging, setIsDragging] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const reactId = useId()
+  console.log("testing");
+  console.log(reactId);
   const id = inputId ?? `file-upload-${reactId}`
-
+    console.log(id);
   const validateAndAddFiles = useCallback(
     (newFiles: File[]) => {
       setError(null)

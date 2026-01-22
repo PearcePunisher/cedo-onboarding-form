@@ -34,6 +34,7 @@ export function Step1Brand({ form }: StepProps) {
                 onChange={field.onChange}
                 value={field.value || []}
                 label="Upload logos (SVG, PNG, EPS)"
+                inputId={``}
               />
             </FormControl>
             <FormDescription>Upload multiple logo versions</FormDescription>
