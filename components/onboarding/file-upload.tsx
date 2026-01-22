@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useCallback, useState, useId } from "react"
+import { useCallback, useState } from "react"
 import { Upload, X, File, ImageIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -15,17 +15,12 @@ interface FileUploadProps {
   label?: string
   maxSize?: number // in bytes
   maxSizeMB?: number // for display purposes
-  inputId?: string
 }
 
-export function FileUpload({ accept, multiple = false, onChange, value = [], label, maxSize = 5 * 1024 * 1024, maxSizeMB = 5, inputId, }: FileUploadProps) {
+export function FileUpload({ accept, multiple = false, onChange, value = [], label, maxSize = 5 * 1024 * 1024, maxSizeMB = 5 }: FileUploadProps) {
   const [isDragging, setIsDragging] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const reactId = useId()
-  console.log("testing");
-  console.log(reactId);
-  const id = inputId ?? `file-upload-${reactId}`
-    console.log(id);
+
   const validateAndAddFiles = useCallback(
     (newFiles: File[]) => {
       setError(null)
@@ -96,7 +91,7 @@ export function FileUpload({ accept, multiple = false, onChange, value = [], lab
           multiple={multiple}
           onChange={handleFileSelect}
           className="hidden"
-          id={`file-upload-${id}`}
+          id={`file-upload-${label}`}
         />
         <label htmlFor={`file-upload-${label}`} className="cursor-pointer">
           <Upload className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
