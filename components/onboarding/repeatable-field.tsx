@@ -14,10 +14,11 @@ interface RepeatableFieldProps<T> {
 }
 
 export function RepeatableField<T>({ items, onAdd, onRemove, renderItem, addLabel }: RepeatableFieldProps<T>) {
+  
   return (
     <div className="space-y-4">
       {items.map((item, index) => (
-        <div key={index} className="relative p-4 rounded-lg bg-muted/30 border border-border">
+        <div key={item.id} className="relative p-4 rounded-lg bg-muted/30 border border-border">
           <Button
             type="button"
             variant="ghost"

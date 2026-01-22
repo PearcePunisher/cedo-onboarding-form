@@ -27,7 +27,7 @@ export function Step5Team({ form }: StepProps) {
         <FormLabel className="mb-3 block">Ownership</FormLabel>
         <RepeatableField
           items={ownership}
-          onAdd={() => form.setValue("ownership", [...ownership, { name: "", title: "", bio: "", headshot: undefined }])}
+          onAdd={() => form.setValue("ownership", [...ownership, { id: crypto.randomUUID(),name: "", title: "", bio: "", headshot: undefined }])}
           onRemove={(index) =>
             form.setValue(
               "ownership",
@@ -121,7 +121,7 @@ export function Step5Team({ form }: StepProps) {
         <RepeatableField
           items={staff}
           onAdd={() =>
-            form.setValue("staff", [...staff, { name: "", title: "", email: "", mobile: "", roleOnSite: "" }])
+            form.setValue("staff", [...staff, {id: crypto.randomUUID(),name: "", title: "", email: "", mobile: "", roleOnSite: "" }])
           }
           onRemove={(index) =>
             form.setValue(

@@ -86,7 +86,7 @@ export function Step3Photography({ form }: StepProps) {
         <FormLabel className="mb-3 block">Tracks</FormLabel>
         <RepeatableField
           items={tracks}
-          onAdd={() => form.setValue("tracks", [...tracks, { trackName: "", trackImages: [] }])}
+          onAdd={() => form.setValue("tracks", [...tracks, { id: crypto.randomUUID(),trackName: "", trackImages: [] }])}
           onRemove={(index) =>
             form.setValue(
               "tracks",
