@@ -72,7 +72,9 @@ export function OnboardingForm() {
   const handleNext = async () => {
     let fieldsToValidate: (keyof OnboardingFormData)[] = []
 
-    if (currentStep === 4) {
+    if (currentStep === 1) {
+      fieldsToValidate = ["logos", "lightBackgroundVersion", "brandGuidelines"]
+    } else if (currentStep === 4) {
       fieldsToValidate = ["drivers"]
     } else if (currentStep === 8) {
       fieldsToValidate = ["assetsApproved"]

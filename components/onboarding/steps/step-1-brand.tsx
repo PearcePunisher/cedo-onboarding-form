@@ -2,7 +2,7 @@
 
 import type { UseFormReturn } from "react-hook-form"
 import type { OnboardingFormData } from "@/lib/schema"
-import { FormField, FormItem, FormLabel, FormControl, FormDescription } from "@/components/ui/form"
+import { FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessage } from "@/components/ui/form"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Textarea } from "@/components/ui/textarea"
 import { FileUpload } from "@/components/onboarding/file-upload"
@@ -26,17 +26,22 @@ export function Step1Brand({ form }: StepProps) {
         name="logos"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Logos</FormLabel>
+            <FormLabel>
+              Logos <span className="text-destructive">*</span>
+            </FormLabel>
             <FormControl>
               <FileUpload
-                accept=".svg,.png,.eps"
+                accept=".svg, .png, .eps, .webp"
                 multiple
                 onChange={field.onChange}
                 value={field.value || []}
-                label="Upload logos (SVG, PNG, EPS)"
+                label="Upload logos (SVG, PNG, EPS, WEBP)"
               />
             </FormControl>
-            <FormDescription>Upload multiple logo versions</FormDescription>
+            <FormDescription>
+              Please provide logos with transparent background (preferred) or white/dark background for app integration purposes.
+            </FormDescription>
+            <FormMessage />
           </FormItem>
         )}
       />
@@ -50,8 +55,11 @@ export function Step1Brand({ form }: StepProps) {
               <FormControl>
                 <Checkbox checked={field.value} onCheckedChange={field.onChange} />
               </FormControl>
-              <div>
-                <FormLabel className="cursor-pointer">Light background version included</FormLabel>
+              <div className="flex-1">
+                <FormLabel className="cursor-pointer">
+                  Light background version included <span className="text-destructive">*</span>
+                </FormLabel>
+                <FormMessage />
               </div>
             </FormItem>
           )}
@@ -78,15 +86,18 @@ export function Step1Brand({ form }: StepProps) {
         name="brandGuidelines"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Brand Guidelines</FormLabel>
+            <FormLabel>
+              Brand Guidelines <span className="text-destructive">*</span>
+            </FormLabel>
             <FormControl>
               <FileUpload
-                accept=".pdf"
+                accept=".pdf, .pptx, .docx"
                 onChange={(files) => field.onChange(files[0])}
                 value={field.value ? [field.value] : []}
-                label="Upload brand guidelines (PDF)"
+                label="Upload brand guidelines (PDF, PowerPoint, Word Document)"
               />
             </FormControl>
+            <FormMessage />
           </FormItem>
         )}
       />

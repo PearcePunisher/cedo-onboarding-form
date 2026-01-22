@@ -2,10 +2,14 @@ import { z } from "zod"
 
 export const onboardingSchema = z.object({
   // Step 1: Brand Assets
-  logos: z.array(z.any()).optional(),
-  lightBackgroundVersion: z.boolean().default(false),
+  logos: z.array(z.any()).min(1, "At least one logo is required"),
+  lightBackgroundVersion: z.boolean().refine((val) => val === true, {
+    message: "Light background version is required",
+  }),
   darkBackgroundVersion: z.boolean().default(false),
-  brandGuidelines: z.any().optional(),
+  brandGuidelines: z.any().refine((val) => val !== undefined && val !== null, {
+    message: "Brand guidelines are required",
+  }),
   brandNotes: z.string().max(5000, "Maximum 5000 characters").optional(),
 
   // Step 2: Car Information
