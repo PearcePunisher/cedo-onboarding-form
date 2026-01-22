@@ -21,6 +21,7 @@ export function Step4Driver({ form }: StepProps) {
 
   const addDriver = () => {
     append({
+      id: crypto.randomUUID(),
       driverName: "",
       hometown: "",
       currentResidence: "",

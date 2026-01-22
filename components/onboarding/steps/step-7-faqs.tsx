@@ -44,7 +44,7 @@ export function Step7Faqs({ form }: StepProps) {
           <FormLabel className="mb-3 block">Custom FAQs</FormLabel>
           <RepeatableField
             items={customFaqs}
-            onAdd={() => form.setValue("customFaqs", [...customFaqs, { question: "", answer: "" }])}
+            onAdd={() => form.setValue("customFaqs", [...customFaqs, { id: crypto.randomUUID(),question: "", answer: "" }])}
             onRemove={(index) =>
               form.setValue(
                 "customFaqs",

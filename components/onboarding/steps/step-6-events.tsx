@@ -116,7 +116,7 @@ export function Step6Events({ form }: StepProps) {
         <RepeatableField
           items={experientialEvents}
           onAdd={() =>
-            form.setValue("experientialEvents", [...experientialEvents, { eventName: "", description: "", images: [] }])
+            form.setValue("experientialEvents", [...experientialEvents, {id: crypto.randomUUID(), eventName: "", description: "", images: [] }])
           }
           onRemove={(index) =>
             form.setValue(
