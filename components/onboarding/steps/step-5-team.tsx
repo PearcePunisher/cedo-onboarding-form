@@ -87,6 +87,7 @@ export function Step5Team({ form }: StepProps) {
                         onChange={(files) => field.onChange(files[0])}
                         value={field.value ? [field.value] : []}
                         label="Upload headshot on plain background"
+                        inputId={`ownership-${index}-headshot`}
                       />
                     </FormControl>
                   </FormItem>
@@ -208,6 +209,7 @@ export function Step5Team({ form }: StepProps) {
                         onChange={(files) => field.onChange(files[0])}
                         value={field.value ? [field.value] : []}
                         label="Upload headshot"
+                        inputId={`staff-${index}-headshot`}
                       />
                     </FormControl>
                   </FormItem>
