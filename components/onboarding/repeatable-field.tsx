@@ -14,7 +14,8 @@ interface RepeatableFieldProps<T> {
 }
 
 export function RepeatableField<T>({ items, onAdd, onRemove, renderItem, addLabel }: RepeatableFieldProps<T>) {
-  
+  console.log("In here: ");
+  console.log(items);
   return (
     <div className="space-y-4">
       {items.map((item, index) => (
