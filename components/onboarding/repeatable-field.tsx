@@ -20,6 +20,8 @@ export function RepeatableField<T>({ items, onAdd, onRemove, renderItem, addLabe
     <div className="space-y-4">
       {items.map((item, index) => {
         const key = (item as any)?.id ?? index
+        console.log("IN KEYE HER!")
+        console.log(key)
         return(
         <div key={key} className="relative p-4 rounded-lg bg-muted/30 border border-border">
           <Button
