@@ -39,6 +39,7 @@ export function FileUpload({ accept, multiple = false, onChange, value = [], lab
   }, [inputId, label, reactId])
 
 
+
   const validateAndAddFiles = useCallback(
     (newFiles: File[]) => {
       setError(null)
@@ -71,6 +72,9 @@ export function FileUpload({ accept, multiple = false, onChange, value = [], lab
 
   const handleFileSelect = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
+      console.log("IN UPLOAD")
+      console.log(e)
+      console.log("END")
       const files = Array.from(e.target.files || [])
       validateAndAddFiles(files)
       // Reset input so same file can be selected again if needed
