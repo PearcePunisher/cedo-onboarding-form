@@ -37,7 +37,7 @@ export function FileUpload({ accept, multiple = false, onChange, value = [], lab
 
     console.log(`file-upload-${safeLabel}-${safeReactId}`)
     return `file-upload-${safeLabel}-${safeReactId}`
-    //may need to be passign the safge. one
+    //may need to be passign the safge
   }, [inputId, label, reactId])
 
 
@@ -121,7 +121,7 @@ export function FileUpload({ accept, multiple = false, onChange, value = [], lab
           multiple={multiple}
           onChange={handleFileSelect}
           className="hidden"
-          id={`file-upload-${reactId}`} // changed label to inputId, didn't fix it || changes back to reactID now for testing.
+          id={`file-upload-${label}`} // changed label to inputId, didn't fix it
         />
         <label htmlFor={`file-upload-${label}`} className="cursor-pointer"> {/* changed label to inputId but it didn't fix it*/}
           <Upload className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
