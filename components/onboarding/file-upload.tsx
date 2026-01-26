@@ -21,7 +21,8 @@ interface FileUploadProps {
 export function FileUpload({ accept, multiple = false, onChange, value = [], label, maxSize = 5 * 1024 * 1024, maxSizeMB = 5, inputId, }: FileUploadProps) {
   const [isDragging, setIsDragging] = useState(false)
   const [error, setError] = useState<string | null>(null)
-
+  console.log("Index value (inputId)")
+  console.log(inputId)
   const reactId = useId()
   const resolvedInputId = useMemo(() => {
     if (inputId) return inputId
@@ -82,6 +83,8 @@ export function FileUpload({ accept, multiple = false, onChange, value = [], lab
       console.log(inputId)
       console.log("reactID")
       console.log(reactId)
+      console.log("label")
+      console.log(label)
       const files = Array.from(e.target.files || [])
       //const files = Array.from(e.dataTransfer.files)
       validateAndAddFiles(files)
