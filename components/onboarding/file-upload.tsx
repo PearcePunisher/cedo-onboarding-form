@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useCallback, useState } from "react"
+import { useCallback, useState,useId,useMemo } from "react"
 import { Upload, X, File, ImageIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -14,12 +14,30 @@ interface FileUploadProps {
   value?: File[]
   label?: string
   maxSize?: number // in bytes
-  maxSizeMB?: number // for display purposes
+  maxSizeMB?: number // for display purposes'
+  inputId?: string
 }
 
-export function FileUpload({ accept, multiple = false, onChange, value = [], label, maxSize = 5 * 1024 * 1024, maxSizeMB = 5 }: FileUploadProps) {
+export function FileUpload({ accept, multiple = false, onChange, value = [], label, maxSize = 5 * 1024 * 1024, maxSizeMB = 5, inputId, }: FileUploadProps) {
   const [isDragging, setIsDragging] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  const reactId = useId()
+  const resolvedInputId = useMemo(() => {
+    if (inputId) return inputId
+
+    const safeLabel = (label || "upload")
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "")
+
+    // useId() contains ":" characters in React 18; strip them for a cleaner HTML id
+    const safeReactId = reactId.replace(/:/g, "")
+
+    return `file-upload-${safeLabel}-${safeReactId}`
+  }, [inputId, label, reactId])
+
 
   const validateAndAddFiles = useCallback(
     (newFiles: File[]) => {

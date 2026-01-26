@@ -202,6 +202,7 @@ export function Step4Driver({ form }: StepProps) {
                         onChange={(files) => field.onChange(files[0])}
                         value={field.value ? [field.value] : []}
                         label="Upload headshot"
+                        inputId='${index}'
                       />
                     </FormControl>
                   </FormItem>
@@ -220,6 +221,7 @@ export function Step4Driver({ form }: StepProps) {
                         onChange={(files) => field.onChange(files[0])}
                         value={field.value ? [field.value] : []}
                         label="Upload hero image"
+                        inputId='${index}'
                       />
                     </FormControl>
                   </FormItem>

@@ -14,11 +14,16 @@ interface RepeatableFieldProps<T> {
 }
 
 export function RepeatableField<T>({ items, onAdd, onRemove, renderItem, addLabel }: RepeatableFieldProps<T>) {
-  
+  console.log("In here: ");
+  console.log(items);
   return (
     <div className="space-y-4">
-      {items.map((item, index) => (
-        <div key={item.id} className="relative p-4 rounded-lg bg-muted/30 border border-border">
+      {items.map((item, index) => {
+        const key = (item as any)?.id ?? index
+        console.log("IN KEYE HER!")
+        console.log(key)
+        return(
+        <div key={key} className="relative p-4 rounded-lg bg-muted/30 border border-border">
           <Button
             type="button"
             variant="ghost"
@@ -30,7 +35,8 @@ export function RepeatableField<T>({ items, onAdd, onRemove, renderItem, addLabe
           </Button>
           {renderItem(item, index)}
         </div>
-      ))}
+      )
+      })}
       <Button type="button" variant="outline" size="sm" onClick={onAdd} className="gap-2 bg-transparent">
         <Plus className="w-4 h-4" />
         {addLabel}

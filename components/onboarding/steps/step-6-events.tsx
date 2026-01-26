@@ -164,6 +164,7 @@ export function Step6Events({ form }: StepProps) {
                         onChange={field.onChange}
                         value={field.value || []}
                         label="Upload event images"
+                        inputId={`.${index}.`}
                       />
                     </FormControl>
                   </FormItem>
