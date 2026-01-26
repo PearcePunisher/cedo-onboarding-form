@@ -5,7 +5,7 @@ export function Header() {
     <header className="border-b border-border bg-secondary/50 backdrop-blur-sm sticky top-0 z-50">
       <div className="container mx-auto px-4 py-4 flex items-center gap-3">
         <Image
-          src="/cedo-apps-logo.png"
+          src="/cedo-apps-logo.avif"
           alt="Cédo Apps"
           width={150}
           height={40}
