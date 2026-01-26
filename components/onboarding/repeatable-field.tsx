@@ -14,14 +14,14 @@ interface RepeatableFieldProps<T> {
 }
 
 export function RepeatableField<T>({ items, onAdd, onRemove, renderItem, addLabel }: RepeatableFieldProps<T>) {
-  console.log("In here: ");
-  console.log(items);
+  //console.log("In here: ");
+  //console.log(items);
   return (
     <div className="space-y-4">
       {items.map((item, index) => {
         const key = (item as any)?.id ?? index
-        console.log("IN KEYE HER!")
-        console.log(key)
+        //console.log("IN KEYE HER!")
+        //console.log(key)
         return(
         <div key={key} className="relative p-4 rounded-lg bg-muted/30 border border-border">
           <Button
