@@ -121,7 +121,7 @@ export function Step3Photography({ form }: StepProps) {
                         onChange={field.onChange}
                         value={field.value || []}
                         label="Upload track images"
-                        inputId={`.${index}.`}
+                        inputId={`${index}`}
                       />
                     </FormControl>
                   </FormItem>

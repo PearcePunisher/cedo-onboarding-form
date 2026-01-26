@@ -25,7 +25,7 @@ export function FileUpload({ accept, multiple = false, onChange, value = [], lab
   console.log(inputId)
   const reactId = useId()
   const resolvedInputId = useMemo(() => {
-    if (inputId) return inputId
+    //if (inputId) return inputId
 
     const safeLabel = (label || "upload")
       .toLowerCase()
@@ -35,8 +35,13 @@ export function FileUpload({ accept, multiple = false, onChange, value = [], lab
 
     // useId() contains ":" characters in React 18; strip them for a cleaner HTML id
     const safeReactId = reactId.replace(/:/g, "")
-
     console.log(`file-upload-${safeLabel}-${safeReactId}`)
+    if (inputId) {
+      return `file-upload-${inputId}-${safeReactId}`
+    }
+
+
+
     return `file-upload-${safeLabel}-${safeReactId}`
     //may need to be passign the safge
   }, [inputId, label, reactId])
@@ -124,9 +129,10 @@ export function FileUpload({ accept, multiple = false, onChange, value = [], lab
           multiple={multiple}
           onChange={handleFileSelect}
           className="hidden"
-          id={`file-upload-${label}`} // changed label to inputId, didn't fix it
+          id={resolvedInputId} // changed label to inputId, didn't fix it || used to tequal {`file-upload-${label}`}
+          //resolvedInputId
         />
-        <label htmlFor={`file-upload-${label}`} className="cursor-pointer"> {/* changed label to inputId but it didn't fix it*/}
+        <label htmlFor={resolvedInputId} className="cursor-pointer"> {/* changed label to inputId but it didn't fix it|| used to tequal {`file-upload-${label}`}*/}
           <Upload className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
           <p className="text-sm text-muted-foreground">{label || "Drop files here or click to upload"}</p>
           {accept && <p className="text-xs text-muted-foreground mt-1">Accepted: {accept}</p>}
