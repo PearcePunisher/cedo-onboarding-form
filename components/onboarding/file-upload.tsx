@@ -35,7 +35,9 @@ export function FileUpload({ accept, multiple = false, onChange, value = [], lab
     // useId() contains ":" characters in React 18; strip them for a cleaner HTML id
     const safeReactId = reactId.replace(/:/g, "")
 
+    console.log(`file-upload-${safeLabel}-${safeReactId}`)
     return `file-upload-${safeLabel}-${safeReactId}`
+    //may need to be passign the safge. one
   }, [inputId, label, reactId])
 
 
@@ -75,7 +77,13 @@ export function FileUpload({ accept, multiple = false, onChange, value = [], lab
       console.log("IN UPLOAD")
       console.log(e)
       console.log("END")
+      console.log(e.target)
+      console.log("Input ID")
+      console.log(inputId)
+      console.log("reactID")
+      console.log(reactId)
       const files = Array.from(e.target.files || [])
+      //const files = Array.from(e.dataTransfer.files)
       validateAndAddFiles(files)
       // Reset input so same file can be selected again if needed
       e.target.value = ''
@@ -113,9 +121,9 @@ export function FileUpload({ accept, multiple = false, onChange, value = [], lab
           multiple={multiple}
           onChange={handleFileSelect}
           className="hidden"
-          id={`file-upload-${inputId}`}
+          id={`file-upload-${reactId}`} // changed label to inputId, didn't fix it || changes back to reactID now for testing.
         />
-        <label htmlFor={`file-upload-${inputId}`} className="cursor-pointer">
+        <label htmlFor={`file-upload-${label}`} className="cursor-pointer"> {/* changed label to inputId but it didn't fix it*/}
           <Upload className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
           <p className="text-sm text-muted-foreground">{label || "Drop files here or click to upload"}</p>
           {accept && <p className="text-xs text-muted-foreground mt-1">Accepted: {accept}</p>}
