@@ -113,9 +113,9 @@ export function FileUpload({ accept, multiple = false, onChange, value = [], lab
           multiple={multiple}
           onChange={handleFileSelect}
           className="hidden"
-          id={`file-upload-${label}`}
+          id={`file-upload-${inputId}`}
         />
-        <label htmlFor={`file-upload-${label}`} className="cursor-pointer">
+        <label htmlFor={`file-upload-${inputId}`} className="cursor-pointer">
           <Upload className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
           <p className="text-sm text-muted-foreground">{label || "Drop files here or click to upload"}</p>
           {accept && <p className="text-xs text-muted-foreground mt-1">Accepted: {accept}</p>}
