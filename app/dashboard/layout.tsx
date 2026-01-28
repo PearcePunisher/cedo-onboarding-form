@@ -14,7 +14,7 @@ export default function DashboardLayout({
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Image
-              src="/cedo-apps-logo.png"
+              src="/cedo-apps-logo.avif"
               alt="Cédo Apps"
               width={150}
               height={40}
