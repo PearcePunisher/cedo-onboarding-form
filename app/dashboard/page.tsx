@@ -10,20 +10,33 @@ import {
 } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import { ExternalLink } from "lucide-react"
+import { neon } from "@neondatabase/serverless"
 
 async function getSubmissions() {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 
-    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
-  
-  const res = await fetch(`${baseUrl}/api/submissions`, {
-    cache: 'no-store'
-  })
-  
-  if (!res.ok) {
+  try {
+    if (!process.env.DATABASE_URL) {
+      throw new Error('DATABASE_URL is not configured')
+    }
+    
+    const sql = neon(process.env.DATABASE_URL)
+    
+    const submissions = await sql`
+      SELECT 
+        reference_id, 
+        created_at,
+        assets_approved,
+        chassis,
+        engine
+      FROM onboarding_submissions 
+      ORDER BY created_at DESC 
+      LIMIT 50
+    `
+    
+    return { submissions }
+  } catch (error) {
+    console.error('Failed to fetch submissions:', error)
     throw new Error('Failed to fetch submissions')
   }
-  
-  return res.json()
 }
 
 export default async function DashboardPage() {
