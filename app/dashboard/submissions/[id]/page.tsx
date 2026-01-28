@@ -5,20 +5,62 @@ import { Button } from "@/components/ui/button"
 import { CopyableText } from "@/components/ui/copyable-text"
 import { ImagePreview } from "@/components/ui/image-preview"
 import { ArrowLeft, CheckCircle2, XCircle, Instagram, Facebook, Twitter } from "lucide-react"
+import { neon } from "@neondatabase/serverless"
 
 async function getSubmissionDetails(referenceId: string) {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 
-    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
-  
-  const res = await fetch(`${baseUrl}/api/submissions?referenceId=${referenceId}`, {
-    cache: 'no-store'
-  })
-  
-  if (!res.ok) {
+  try {
+    if (!process.env.DATABASE_URL) {
+      throw new Error('DATABASE_URL is not configured')
+    }
+    
+    const sql = neon(process.env.DATABASE_URL)
+    
+    const [submission] = await sql`
+      SELECT * FROM onboarding_submissions 
+      WHERE reference_id = ${referenceId}
+    `
+
+    if (!submission) {
+      return null
+    }
+
+    const drivers = await sql`
+      SELECT * FROM drivers WHERE reference_id = ${referenceId}
+    `
+
+    const tracks = await sql`
+      SELECT * FROM tracks WHERE reference_id = ${referenceId}
+    `
+
+    const events = await sql`
+      SELECT * FROM experiential_events WHERE reference_id = ${referenceId}
+    `
+
+    const ownership = await sql`
+      SELECT * FROM ownership WHERE reference_id = ${referenceId}
+    `
+
+    const staff = await sql`
+      SELECT * FROM staff WHERE reference_id = ${referenceId}
+    `
+
+    const faqs = await sql`
+      SELECT * FROM custom_faqs WHERE reference_id = ${referenceId}
+    `
+
+    return {
+      submission,
+      drivers,
+      tracks,
+      events,
+      ownership,
+      staff,
+      faqs,
+    }
+  } catch (error) {
+    console.error('Failed to fetch submission details:', error)
     return null
   }
-  
-  return res.json()
 }
 
 function parseJsonField(field: string | null) {
