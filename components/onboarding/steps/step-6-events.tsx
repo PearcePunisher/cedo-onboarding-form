@@ -1,16 +1,21 @@
-"use client"
+"use client";
 
-import type { UseFormReturn } from "react-hook-form"
-import type { OnboardingFormData } from "@/lib/schema"
-import { FormField, FormItem, FormLabel, FormControl } from "@/components/ui/form"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { FileUpload } from "@/components/onboarding/file-upload"
-import { RepeatableField } from "@/components/onboarding/repeatable-field"
+import type { UseFormReturn } from "react-hook-form";
+import type { OnboardingFormData } from "@/lib/schema";
+import {
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+} from "@/components/ui/form";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { FileUpload } from "@/components/onboarding/file-upload";
+import { RepeatableField } from "@/components/onboarding/repeatable-field";
 
 interface StepProps {
-  form: UseFormReturn<OnboardingFormData>
+  form: UseFormReturn<OnboardingFormData>;
 }
 
 const eventTypeOptions = [
@@ -22,18 +27,20 @@ const eventTypeOptions = [
   "Hospitality suite hours",
   "Team meet & greet",
   "Garage tours",
-]
+];
 
 export function Step6Events({ form }: StepProps) {
-  const experientialEvents = form.watch("experientialEvents") || []
+  const experientialEvents = form.watch("experientialEvents") || [];
 
   return (
     <div className="space-y-6">
       <div>
         <h2 className="text-xl font-semibold mb-1">Event Preferences</h2>
-        <p className="text-sm text-muted-foreground">Configure event and schedule settings</p>
+        <p className="text-sm text-muted-foreground">
+          Configure event and schedule settings
+        </p>
       </div>
-
+      {/* TODO: Add selector for IndyCar, NHRA, F1, IMSA, NASCAR, etc. and the schedule preferences will need to update accordingly. So F1 schedule preferences will only show when F1 is selected. */}
       <div className="space-y-4">
         <FormLabel>Schedule Preferences</FormLabel>
 
@@ -43,10 +50,15 @@ export function Step6Events({ form }: StepProps) {
           render={({ field }) => (
             <FormItem className="flex items-start gap-3 space-y-0 p-4 rounded-lg bg-muted/30">
               <FormControl>
-                <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                <Checkbox
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
               </FormControl>
               <div>
-                <FormLabel className="cursor-pointer">Confirm INDYCAR-only events</FormLabel>
+                <FormLabel className="cursor-pointer">
+                  Confirm INDYCAR-only events
+                </FormLabel>
               </div>
             </FormItem>
           )}
@@ -58,10 +70,15 @@ export function Step6Events({ form }: StepProps) {
           render={({ field }) => (
             <FormItem className="flex items-start gap-3 space-y-0 p-4 rounded-lg bg-muted/30">
               <FormControl>
-                <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                <Checkbox
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
               </FormControl>
               <div>
-                <FormLabel className="cursor-pointer">Include INDYCAR NXT if applicable</FormLabel>
+                <FormLabel className="cursor-pointer">
+                  Include INDYCAR NXT if applicable
+                </FormLabel>
               </div>
             </FormItem>
           )}
@@ -73,10 +90,15 @@ export function Step6Events({ form }: StepProps) {
           render={({ field }) => (
             <FormItem className="flex items-start gap-3 space-y-0 p-4 rounded-lg bg-muted/30">
               <FormControl>
-                <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                <Checkbox
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
               </FormControl>
               <div>
-                <FormLabel className="cursor-pointer">Acknowledge official INDYCAR schedule source</FormLabel>
+                <FormLabel className="cursor-pointer">
+                  Acknowledge official INDYCAR schedule source
+                </FormLabel>
               </div>
             </FormItem>
           )}
@@ -91,15 +113,17 @@ export function Step6Events({ form }: StepProps) {
             <FormLabel>Event Types to Display</FormLabel>
             <div className="grid gap-3 sm:grid-cols-2">
               {eventTypeOptions.map((type) => (
-                <div key={type} className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
+                <div
+                  key={type}
+                  className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
                   <Checkbox
                     checked={field.value?.includes(type)}
                     onCheckedChange={(checked) => {
-                      const current = field.value || []
+                      const current = field.value || [];
                       if (checked) {
-                        field.onChange([...current, type])
+                        field.onChange([...current, type]);
                       } else {
-                        field.onChange(current.filter((t) => t !== type))
+                        field.onChange(current.filter((t) => t !== type));
                       }
                     }}
                   />
@@ -116,7 +140,15 @@ export function Step6Events({ form }: StepProps) {
         <RepeatableField
           items={experientialEvents}
           onAdd={() =>
-            form.setValue("experientialEvents", [...experientialEvents, {id: crypto.randomUUID(), eventName: "", description: "", images: [] }])
+            form.setValue("experientialEvents", [
+              ...experientialEvents,
+              {
+                id: crypto.randomUUID(),
+                eventName: "",
+                description: "",
+                images: [],
+              },
+            ])
           }
           onRemove={(index) =>
             form.setValue(
@@ -134,7 +166,13 @@ export function Step6Events({ form }: StepProps) {
                   <FormItem>
                     <FormLabel>Event Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="Event name" className="bg-input" maxLength={5000} showCharCount {...field} />
+                      <Input
+                        placeholder="Event name"
+                        className="bg-input"
+                        maxLength={5000}
+                        showCharCount
+                        {...field}
+                      />
                     </FormControl>
                   </FormItem>
                 )}
@@ -146,7 +184,13 @@ export function Step6Events({ form }: StepProps) {
                   <FormItem>
                     <FormLabel>Description</FormLabel>
                     <FormControl>
-                      <Textarea placeholder="Event description" className="bg-input" maxLength={5000} showCharCount {...field} />
+                      <Textarea
+                        placeholder="Event description"
+                        className="bg-input"
+                        maxLength={5000}
+                        showCharCount
+                        {...field}
+                      />
                     </FormControl>
                   </FormItem>
                 )}
@@ -175,5 +219,5 @@ export function Step6Events({ form }: StepProps) {
         />
       </div>
     </div>
-  )
+  );
 }

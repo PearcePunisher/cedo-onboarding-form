@@ -19,12 +19,12 @@ export function Step5Team({ form }: StepProps) {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-semibold mb-1">Team & Staff</h2>
+        <h2 className="text-xl font-semibold mb-1">Ownership & Staff</h2>
         <p className="text-sm text-muted-foreground">Add ownership and staff information</p>
       </div>
 
       <div>
-        <FormLabel className="mb-3 block">Ownership</FormLabel>
+        <FormLabel className="mb-3 block">Team Ownership</FormLabel>
         <RepeatableField
           items={ownership}
           onAdd={() => form.setValue("ownership", [...ownership, { id: crypto.randomUUID(),name: "", title: "", bio: "", headshot: undefined }])}
@@ -103,7 +103,7 @@ export function Step5Team({ form }: StepProps) {
         name="teamBackground"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Team Background</FormLabel>
+            <FormLabel>Team Background Information</FormLabel>
             <FormControl>
               <Textarea
                 placeholder="When the team was formed, where you are based, team history..."

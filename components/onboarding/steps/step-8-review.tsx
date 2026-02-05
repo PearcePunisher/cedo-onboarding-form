@@ -1,3 +1,7 @@
+// TODO: Create process for user to login and edit their entry. Login provided by Clerk. The user is only able to see their entry. The user will need to login and be able to add in new schedules and FAQs, images and any other element ofthi form.
+// TODO: The client needs to be able to edit each race/track individually because the schedule is only decided closer to the event date.
+// TODO: Setup a notification system to inform Wicked Staff of new submissions and form updates.
+
 "use client"
 
 import type React from "react"

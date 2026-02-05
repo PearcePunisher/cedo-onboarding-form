@@ -23,6 +23,14 @@ export const onboardingSchema = z.object({
   // Step 3: Photography
   eventPhotography: z.array(z.any()).optional(),
   photographyTypes: z.array(z.string()).default([]),
+  photographyTypeAssets: z
+    .array(
+      z.object({
+        type: z.string(),
+        files: z.array(z.any()).optional(),
+      }),
+    )
+    .default([]),
   tracks: z
     .array(
       z.object({

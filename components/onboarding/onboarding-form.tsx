@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { ChevronLeft, ChevronRight, Send } from "lucide-react"
@@ -24,7 +24,13 @@ const STEP_LABELS = ["Brand Assets", "Car Info", "Photography", "Driver", "Team 
 
 const TOTAL_STEPS = 8
 
-export function OnboardingForm() {
+const DRAFT_STORAGE_KEY = "cedo-onboarding-draft"
+
+type OnboardingFormProps = {
+  enableDraft?: boolean
+}
+
+export function OnboardingForm({ enableDraft = false }: OnboardingFormProps) {
   const [currentStep, setCurrentStep] = useState(1)
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [referenceId, setReferenceId] = useState("")
@@ -38,6 +44,7 @@ export function OnboardingForm() {
       plainWhiteBackground: false,
       multipleAngles: false,
       photographyTypes: [],
+      photographyTypeAssets: [],
       tracks: [],
       experientialEvents: [],
       drivers: [
@@ -69,6 +76,72 @@ export function OnboardingForm() {
     mode: "onChange",
   })
 
+  const sanitizeDraftData = (data: OnboardingFormData): OnboardingFormData => {
+    const stripFileFields = <T extends Record<string, any>>(items: T[] | undefined, keys: (keyof T)[]) =>
+      items?.map((item) => {
+        const copy = { ...item }
+        keys.forEach((key) => {
+          if (key in copy) copy[key] = undefined
+        })
+        return copy as T
+      }) ?? []
+
+    return {
+      ...data,
+      logos: [],
+      brandGuidelines: undefined,
+      carImages: [],
+      eventPhotography: [],
+      photographyTypeAssets: data.photographyTypeAssets?.map((asset) => ({ type: asset.type, files: [] })) ?? [],
+      drivers: stripFileFields(data.drivers, ["headshot", "heroImage"]),
+      tracks: stripFileFields(data.tracks, ["trackImages"]),
+      experientialEvents: stripFileFields(data.experientialEvents, ["images"]),
+      ownership: stripFileFields(data.ownership, ["headshot"]),
+      staff: stripFileFields(data.staff, ["headshot"]),
+    }
+  }
+
+  const saveDraft = (options?: { silent?: boolean }) => {
+    if (!enableDraft || typeof window === "undefined") return
+
+    const draft = {
+      data: sanitizeDraftData(form.getValues()),
+      currentStep,
+      savedAt: new Date().toISOString(),
+    }
+
+    localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draft))
+    if (!options?.silent) {
+      alert("Your progress has been saved. You can safely return later to continue.")
+    }
+  }
+
+  useEffect(() => {
+    if (!enableDraft || typeof window === "undefined") return
+
+    const rawDraft = localStorage.getItem(DRAFT_STORAGE_KEY)
+    if (!rawDraft) return
+
+    try {
+      const parsed = JSON.parse(rawDraft) as { data?: OnboardingFormData; currentStep?: number; savedAt?: string }
+      if (!parsed?.data) return
+
+      const shouldRestore = confirm(
+        parsed.savedAt
+          ? `We found a saved draft from ${new Date(parsed.savedAt).toLocaleString()}. Continue where you left off?`
+          : "We found a saved draft. Continue where you left off?"
+      )
+
+      if (shouldRestore) {
+        form.reset(parsed.data)
+        setCurrentStep(parsed.currentStep ?? 1)
+      }
+    } catch (error) {
+      console.error("Failed to load saved draft", error)
+      localStorage.removeItem(DRAFT_STORAGE_KEY)
+    }
+  }, [enableDraft, form])
+
   const handleNext = async () => {
     let fieldsToValidate: (keyof OnboardingFormData)[] = []
 
@@ -85,6 +158,9 @@ export function OnboardingForm() {
       if (!isValid) return
     }
 
+    // Save progress before advancing to ensure previous step data is persisted
+    saveDraft({ silent: true })
+
     if (currentStep < TOTAL_STEPS) {
       setCurrentStep((prev) => prev + 1)
     }
@@ -92,6 +168,8 @@ export function OnboardingForm() {
 
   const handleBack = () => {
     if (currentStep > 1) {
+      // Save current state before moving back
+      saveDraft({ silent: true })
       setCurrentStep((prev) => prev - 1)
     }
   }
@@ -114,6 +192,7 @@ export function OnboardingForm() {
     addFileSize(data.brandGuidelines)
     addFileSize(data.carImages)
     addFileSize(data.eventPhotography)
+    data.photographyTypeAssets?.forEach((asset) => addFileSize(asset.files))
     
     data.drivers?.forEach(driver => {
       addFileSize(driver.headshot)
@@ -172,6 +251,9 @@ export function OnboardingForm() {
       if (result.success && result.referenceId) {
         setReferenceId(result.referenceId)
         setIsSubmitted(true)
+        if (enableDraft && typeof window !== "undefined") {
+          localStorage.removeItem(DRAFT_STORAGE_KEY)
+        }
       } else {
         // Handle error - you might want to show a toast notification
         console.error("Submission failed:", result.error)
@@ -208,6 +290,9 @@ export function OnboardingForm() {
     setCurrentStep(1)
     setIsSubmitted(false)
     setReferenceId("")
+    if (enableDraft && typeof window !== "undefined") {
+      localStorage.removeItem(DRAFT_STORAGE_KEY)
+    }
   }
 
   const renderStep = () => {
@@ -265,17 +350,29 @@ export function OnboardingForm() {
                   Back
                 </Button>
 
-                {currentStep === TOTAL_STEPS ? (
-                  <Button type="submit" className="gap-2" disabled={isSubmitting}>
-                    {isSubmitting ? "Submitting..." : "Submit"}
-                    <Send className="w-4 h-4" />
+                <div className="flex items-center gap-3">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={saveDraft}
+                    className="gap-2"
+                    disabled={!enableDraft}
+                  >
+                    Save & Continue Later
                   </Button>
-                ) : (
-                  <Button type="button" onClick={handleNext} className="gap-2">
-                    Continue
-                    <ChevronRight className="w-4 h-4" />
-                  </Button>
-                )}
+
+                  {currentStep === TOTAL_STEPS ? (
+                    <Button type="submit" className="gap-2" disabled={isSubmitting}>
+                      {isSubmitting ? "Submitting..." : "Submit"}
+                      <Send className="w-4 h-4" />
+                    </Button>
+                  ) : (
+                    <Button type="button" onClick={handleNext} className="gap-2">
+                      Continue
+                      <ChevronRight className="w-4 h-4" />
+                    </Button>
+                  )}
+                </div>
               </div>
             </form>
           </Form>

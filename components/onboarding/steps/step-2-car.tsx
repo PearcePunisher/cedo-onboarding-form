@@ -68,14 +68,14 @@ export function Step2Car({ form }: StepProps) {
         name="carImages"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Car Images</FormLabel>
+            <FormLabel>Car Side Profile (Horizontal)</FormLabel>
             <FormControl>
               <FileUpload
-                accept="image/*"
+                accept=".svg, .png, .eps, .webp, .avif"
                 multiple
                 onChange={field.onChange}
                 value={field.value || []}
-                label="Upload car images"
+                label="Upload car side profile images (SVG, PNG, EPS, WEBP, AVIF)"
               />
             </FormControl>
           </FormItem>

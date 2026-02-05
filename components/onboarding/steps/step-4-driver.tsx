@@ -209,24 +209,24 @@ export function Step4Driver({ form }: StepProps) {
                 )}
               />
 
-              <FormField
-                control={form.control}
-                name={`drivers.${index}.heroImage`}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Hero Image</FormLabel>
-                    <FormControl>
-                      <FileUpload
-                        accept="image/*"
-                        onChange={(files) => field.onChange(files[0])}
-                        value={field.value ? [field.value] : []}
-                        label="Upload hero image"
-                        inputId='${index}'
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
+                {/* <FormField
+                  control={form.control}
+                  name={`drivers.${index}.heroImage`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Hero Image</FormLabel>
+                      <FormControl>
+                        <FileUpload
+                          accept="image/*"
+                          onChange={(files) => field.onChange(files[0])}
+                          value={field.value ? [field.value] : []}
+                          label="Upload hero image"
+                          inputId='${index}'
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                /> */}
             </div>
           </div>
         )}

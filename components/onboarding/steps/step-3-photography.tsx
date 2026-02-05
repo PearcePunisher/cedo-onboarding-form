@@ -25,6 +25,8 @@ const photographyTypeOptions = [
 
 export function Step3Photography({ form }: StepProps) {
   const tracks = form.watch("tracks") || []
+  const selectedTypes = form.watch("photographyTypes") || []
+  const typeAssets = form.watch("photographyTypeAssets") || []
 
   return (
     <div className="space-y-6">
@@ -43,11 +45,11 @@ export function Step3Photography({ form }: StepProps) {
             <FormLabel>Approved Event Photography</FormLabel>
             <FormControl>
               <FileUpload
-                accept="image/*,.eps,.svg"
+                accept=".svg, .png, .eps, .webp, .avif"
                 multiple
                 onChange={field.onChange}
                 value={field.value || []}
-                label="Upload approved event photography (PNG, EPS, or SVG)"
+                label="Upload approved event photography (SVG, PNG, EPS, WEBP, AVIF)"
               />
             </FormControl>
           </FormItem>
@@ -67,10 +69,23 @@ export function Step3Photography({ form }: StepProps) {
                     checked={field.value?.includes(type)}
                     onCheckedChange={(checked) => {
                       const current = field.value || []
+                      const currentAssets = form.getValues("photographyTypeAssets") || []
                       if (checked) {
                         field.onChange([...current, type])
+                        if (!currentAssets.some((asset: { type: string }) => asset.type === type)) {
+                          form.setValue(
+                            "photographyTypeAssets",
+                            [...currentAssets, { type, files: [] }],
+                            { shouldDirty: true },
+                          )
+                        }
                       } else {
                         field.onChange(current.filter((t) => t !== type))
+                        form.setValue(
+                          "photographyTypeAssets",
+                          currentAssets.filter((asset: { type: string }) => asset.type !== type),
+                          { shouldDirty: true },
+                        )
                       }
                     }}
                   />
@@ -81,6 +96,45 @@ export function Step3Photography({ form }: StepProps) {
           </FormItem>
         )}
       />
+
+      {selectedTypes.length > 0 && (
+        <div className="space-y-4">
+          <FormLabel>Photography Type Assets</FormLabel>
+          <div className="grid gap-4 sm:grid-cols-2">
+            {selectedTypes.map((type) => {
+              const index = typeAssets.findIndex((asset: { type: string }) => asset.type === type)
+              const files = index >= 0 ? typeAssets[index].files || [] : []
+
+              return (
+                <div key={type} className="p-4 rounded-lg border border-border bg-muted/30 space-y-3">
+                  <div className="text-sm font-medium">{type}</div>
+                  <FileUpload
+                    accept=".svg, .png, .eps, .webp, .avif"
+                    multiple
+                    value={files}
+                    onChange={(newFiles) => {
+                      const currentAssets = form.getValues("photographyTypeAssets") || []
+                      if (index === -1) {
+                        form.setValue(
+                          "photographyTypeAssets",
+                          [...currentAssets, { type, files: newFiles }],
+                          { shouldDirty: true },
+                        )
+                        return
+                      }
+                      const updated = [...currentAssets]
+                      updated[index] = { ...updated[index], files: newFiles }
+                      form.setValue("photographyTypeAssets", updated, { shouldDirty: true })
+                    }}
+                    label={`Upload ${type.toLowerCase()} imagery`}
+                    inputId={`photo-type-${type.replace(/[^a-z0-9]/gi, "-").toLowerCase()}`}
+                  />
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
 
       <div>
         <FormLabel className="mb-3 block">Tracks</FormLabel>
@@ -116,7 +170,7 @@ export function Step3Photography({ form }: StepProps) {
                     <FormLabel>Track Images</FormLabel>
                     <FormControl>
                       <FileUpload
-                        accept="image/*"
+                        accept=".svg, .png, .eps, .webp, .avif"
                         multiple
                         onChange={field.onChange}
                         value={field.value || []}
