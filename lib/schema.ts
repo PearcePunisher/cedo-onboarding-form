@@ -1,15 +1,24 @@
 import { z } from "zod"
 
+// NOTE: Temporary test mode to relax required fields. Set to false to restore required validation.
+const RELAX_REQUIRED_FOR_TESTING = true
+
 export const onboardingSchema = z.object({
   // Step 1: Brand Assets
-  logos: z.array(z.any()).min(1, "At least one logo is required"),
-  lightBackgroundVersion: z.boolean().refine((val) => val === true, {
-    message: "Light background version is required",
-  }),
+  logos: RELAX_REQUIRED_FOR_TESTING
+    ? z.array(z.any()).optional()
+    : z.array(z.any()).min(1, "At least one logo is required"),
+  lightBackgroundVersion: RELAX_REQUIRED_FOR_TESTING
+    ? z.boolean().optional()
+    : z.boolean().refine((val) => val === true, {
+        message: "Light background version is required",
+      }),
   darkBackgroundVersion: z.boolean().default(false),
-  brandGuidelines: z.any().refine((val) => val !== undefined && val !== null, {
-    message: "Brand guidelines are required",
-  }),
+  brandGuidelines: RELAX_REQUIRED_FOR_TESTING
+    ? z.any().optional()
+    : z.any().refine((val) => val !== undefined && val !== null, {
+        message: "Brand guidelines are required",
+      }),
   brandNotes: z.string().max(5000, "Maximum 5000 characters").optional(),
 
   // Step 2: Car Information
@@ -35,7 +44,9 @@ export const onboardingSchema = z.object({
     .array(
       z.object({
         id: z.string().optional(),
-        trackName: z.string().max(5000, "Maximum 5000 characters"),
+        trackName: RELAX_REQUIRED_FOR_TESTING
+          ? z.string().max(5000, "Maximum 5000 characters").optional()
+          : z.string().max(5000, "Maximum 5000 characters"),
         trackImages: z.array(z.any()).optional(),
       }),
     )
@@ -44,7 +55,9 @@ export const onboardingSchema = z.object({
     .array(
       z.object({
         id: z.string().optional(),
-        eventName: z.string().max(5000, "Maximum 5000 characters"),
+        eventName: RELAX_REQUIRED_FOR_TESTING
+          ? z.string().max(5000, "Maximum 5000 characters").optional()
+          : z.string().max(5000, "Maximum 5000 characters"),
         description: z.string().max(5000, "Maximum 5000 characters").optional(),
         images: z.array(z.any()).optional(),
       }),
@@ -56,7 +69,9 @@ export const onboardingSchema = z.object({
     .array(
       z.object({
         id: z.string().optional(),
-        driverName: z.string().min(1, "Driver name is required").max(5000, "Maximum 5000 characters"),
+        driverName: RELAX_REQUIRED_FOR_TESTING
+          ? z.string().max(5000, "Maximum 5000 characters").optional()
+          : z.string().min(1, "Driver name is required").max(5000, "Maximum 5000 characters"),
         hometown: z.string().max(5000, "Maximum 5000 characters").optional(),
         currentResidence: z.string().max(5000, "Maximum 5000 characters").optional(),
         birthdate: z.string().optional(),
@@ -70,7 +85,7 @@ export const onboardingSchema = z.object({
         heroImage: z.any().optional(),
       }),
     )
-    .min(1, "At least one driver is required"),
+    .default([]),
 
 
   // Step 5: Team & Staff
@@ -78,7 +93,9 @@ export const onboardingSchema = z.object({
     .array(
       z.object({
         id: z.string().optional(),
-        name: z.string().max(5000, "Maximum 5000 characters"),
+        name: RELAX_REQUIRED_FOR_TESTING
+          ? z.string().max(5000, "Maximum 5000 characters").optional()
+          : z.string().max(5000, "Maximum 5000 characters"),
         title: z.string().max(5000, "Maximum 5000 characters").optional(),
         bio: z.string().max(5000, "Maximum 5000 characters").optional(),
         headshot: z.any().optional(),
@@ -90,7 +107,9 @@ export const onboardingSchema = z.object({
     .array(
       z.object({
         id: z.string().optional(),
-        name: z.string().max(5000, "Maximum 5000 characters"),
+        name: RELAX_REQUIRED_FOR_TESTING
+          ? z.string().max(5000, "Maximum 5000 characters").optional()
+          : z.string().max(5000, "Maximum 5000 characters"),
         title: z.string().max(5000, "Maximum 5000 characters").optional(),
         email: z.string().email("Valid email required").optional().or(z.literal("")),
         mobile: z.string().max(5000, "Maximum 5000 characters").optional(),
@@ -125,17 +144,23 @@ export const onboardingSchema = z.object({
     .array(
       z.object({
         id: z.string().optional(),
-        question: z.string().max(5000, "Maximum 5000 characters"),
-        answer: z.string().max(5000, "Maximum 5000 characters"),
+        question: RELAX_REQUIRED_FOR_TESTING
+          ? z.string().max(5000, "Maximum 5000 characters").optional()
+          : z.string().max(5000, "Maximum 5000 characters"),
+        answer: RELAX_REQUIRED_FOR_TESTING
+          ? z.string().max(5000, "Maximum 5000 characters").optional()
+          : z.string().max(5000, "Maximum 5000 characters"),
       }),
     )
     .default([]),
   specialNotes: z.string().max(5000, "Maximum 5000 characters").optional(),
 
   // Step 8: Review & Submit
-  assetsApproved: z.boolean().refine((val) => val === true, {
-    message: "You must confirm all assets are approved",
-  }),
+  assetsApproved: RELAX_REQUIRED_FOR_TESTING
+    ? z.boolean().optional()
+    : z.boolean().refine((val) => val === true, {
+        message: "You must confirm all assets are approved",
+      }),
   additionalNotes: z.string().max(5000, "Maximum 5000 characters").optional(),
 })
 

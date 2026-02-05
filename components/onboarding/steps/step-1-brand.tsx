@@ -50,7 +50,7 @@ export function Step1Brand({ form }: StepProps) {
         render={({ field }) => (
           <FormItem>
             <FormLabel>
-              Logos <span className="text-destructive">*</span>
+              Logos {/* TODO: add required indicator when RELAX_REQUIRED_FOR_TESTING is false */}
             </FormLabel>
             <FormControl>
               <FileUpload
@@ -123,7 +123,7 @@ export function Step1Brand({ form }: StepProps) {
               </FormControl>
               <div className="flex-1">
                 <FormLabel className="cursor-pointer">
-                  Light background version included <span className="text-destructive">*</span>
+                  Light background version included
                 </FormLabel>
                 <FormMessage />
               </div>
@@ -146,45 +146,25 @@ export function Step1Brand({ form }: StepProps) {
           )}
         />
       </div> */}
-      <div className="rounded-lg border bg-muted/20 p-4 space-y-3">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <div className="text-sm font-medium">Need a starting point?</div>
-            <p className="text-xs text-muted-foreground">Use this outline or download it as a template you can edit.</p>
-          </div>
-          <div className="flex gap-2">
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={async () => {
-                try {
-                  await navigator.clipboard.writeText(exampleGuidelines)
-                  setCopiedExample(true)
-                  setTimeout(() => setCopiedExample(false), 1800)
-                } catch (error) {
-                  console.error("Failed to copy brand guideline example", error)
-                }
-              }}
-            >
-              {copiedExample ? "Copied" : "Copy outline"}
-            </Button>
-            <Button
-              size="sm"
-              onClick={() => {
-                const blob = new Blob([exampleGuidelines], { type: "text/markdown" })
-                const url = URL.createObjectURL(blob)
-                const link = document.createElement("a")
-                link.href = url
-                link.download = "brand-guidelines-example.md"
-                link.click()
-                URL.revokeObjectURL(url)
-              }}
-            >
-              Download .md
-            </Button>
-          </div>
+      <div className="rounded-lg border bg-muted/20 p-4 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <div className="text-sm font-medium">Need a starting point?</div>
+          <p className="text-xs text-muted-foreground">Download a sample brand guide you can edit.</p>
         </div>
-        <pre className="whitespace-pre-wrap rounded-md border bg-background p-3 text-xs leading-relaxed">{exampleGuidelines}</pre>
+        <Button
+          size="sm"
+          onClick={() => {
+            const blob = new Blob([exampleGuidelines], { type: "text/markdown" })
+            const url = URL.createObjectURL(blob)
+            const link = document.createElement("a")
+            link.href = url
+            link.download = "brand-guidelines-example.md"
+            link.click()
+            URL.revokeObjectURL(url)
+          }}
+        >
+          Download sample brand guide
+        </Button>
       </div>
       <FormField
         control={form.control}
@@ -192,7 +172,7 @@ export function Step1Brand({ form }: StepProps) {
         render={({ field }) => (
           <FormItem>
             <FormLabel>
-              Brand Guidelines <span className="text-destructive">*</span>
+              Brand Guidelines {/* TODO: add required indicator when RELAX_REQUIRED_FOR_TESTING is false */}
             </FormLabel>
             <FormControl>
               <FileUpload
