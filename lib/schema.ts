@@ -34,6 +34,7 @@ export const onboardingSchema = z.object({
   tracks: z
     .array(
       z.object({
+        id: z.string().optional(),
         trackName: z.string().max(5000, "Maximum 5000 characters"),
         trackImages: z.array(z.any()).optional(),
       }),
@@ -42,6 +43,7 @@ export const onboardingSchema = z.object({
   experientialEvents: z
     .array(
       z.object({
+        id: z.string().optional(),
         eventName: z.string().max(5000, "Maximum 5000 characters"),
         description: z.string().max(5000, "Maximum 5000 characters").optional(),
         images: z.array(z.any()).optional(),
@@ -53,6 +55,7 @@ export const onboardingSchema = z.object({
   drivers: z
     .array(
       z.object({
+        id: z.string().optional(),
         driverName: z.string().min(1, "Driver name is required").max(5000, "Maximum 5000 characters"),
         hometown: z.string().max(5000, "Maximum 5000 characters").optional(),
         currentResidence: z.string().max(5000, "Maximum 5000 characters").optional(),
@@ -74,6 +77,7 @@ export const onboardingSchema = z.object({
   ownership: z
     .array(
       z.object({
+        id: z.string().optional(),
         name: z.string().max(5000, "Maximum 5000 characters"),
         title: z.string().max(5000, "Maximum 5000 characters").optional(),
         bio: z.string().max(5000, "Maximum 5000 characters").optional(),
@@ -85,6 +89,7 @@ export const onboardingSchema = z.object({
   staff: z
     .array(
       z.object({
+        id: z.string().optional(),
         name: z.string().max(5000, "Maximum 5000 characters"),
         title: z.string().max(5000, "Maximum 5000 characters").optional(),
         email: z.string().email("Valid email required").optional().or(z.literal("")),
@@ -96,9 +101,22 @@ export const onboardingSchema = z.object({
     .default([]),
 
   // Step 6: Event Preferences
+  selectedSeries: z.array(z.string()).default([]),
   indycarOnly: z.boolean().default(false),
   includeIndycarNxt: z.boolean().default(false),
   acknowledgeScheduleSource: z.boolean().default(false),
+  f1IncludeSupportSeries: z.boolean().default(false),
+  f1IncludeSprint: z.boolean().default(false),
+  f1AcknowledgeScheduleSource: z.boolean().default(false),
+  imsaIncludeMichelinPilot: z.boolean().default(false),
+  imsaWeatherTechOnly: z.boolean().default(false),
+  imsaAcknowledgeScheduleSource: z.boolean().default(false),
+  nascarIncludeXfinity: z.boolean().default(false),
+  nascarIncludeTruckSeries: z.boolean().default(false),
+  nascarAcknowledgeScheduleSource: z.boolean().default(false),
+  nhraIncludeSportsman: z.boolean().default(false),
+  nhraProOnly: z.boolean().default(false),
+  nhraAcknowledgeScheduleSource: z.boolean().default(false),
   eventTypes: z.array(z.string()).default([]),
 
   // Step 7: FAQs
@@ -106,6 +124,7 @@ export const onboardingSchema = z.object({
   customFaqs: z
     .array(
       z.object({
+        id: z.string().optional(),
         question: z.string().max(5000, "Maximum 5000 characters"),
         answer: z.string().max(5000, "Maximum 5000 characters"),
       }),

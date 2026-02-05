@@ -29,9 +29,22 @@ CREATE TABLE IF NOT EXISTS onboarding_submissions (
   team_background TEXT,
   
   -- Step 6: Event Preferences
+  selected_series JSONB DEFAULT '[]',
   indycar_only BOOLEAN DEFAULT FALSE,
   include_indycar_nxt BOOLEAN DEFAULT FALSE,
   acknowledge_schedule_source BOOLEAN DEFAULT FALSE,
+  f1_include_support_series BOOLEAN DEFAULT FALSE,
+  f1_include_sprint BOOLEAN DEFAULT FALSE,
+  f1_acknowledge_schedule_source BOOLEAN DEFAULT FALSE,
+  imsa_include_michelin_pilot BOOLEAN DEFAULT FALSE,
+  imsa_weather_tech_only BOOLEAN DEFAULT FALSE,
+  imsa_acknowledge_schedule_source BOOLEAN DEFAULT FALSE,
+  nascar_include_xfinity BOOLEAN DEFAULT FALSE,
+  nascar_include_truck_series BOOLEAN DEFAULT FALSE,
+  nascar_acknowledge_schedule_source BOOLEAN DEFAULT FALSE,
+  nhra_include_sportsman BOOLEAN DEFAULT FALSE,
+  nhra_pro_only BOOLEAN DEFAULT FALSE,
+  nhra_acknowledge_schedule_source BOOLEAN DEFAULT FALSE,
   event_types JSONB DEFAULT '[]',
   
   -- Step 7: FAQs

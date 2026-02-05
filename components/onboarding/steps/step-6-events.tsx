@@ -18,6 +18,8 @@ interface StepProps {
   form: UseFormReturn<OnboardingFormData>;
 }
 
+const seriesOptions = ["INDYCAR", "NHRA", "F1", "IMSA", "NASCAR"] as const;
+
 const eventTypeOptions = [
   "Credential office hours",
   "Practice",
@@ -29,8 +31,44 @@ const eventTypeOptions = [
   "Garage tours",
 ];
 
+const schedulePreferenceConfig: Record<
+  (typeof seriesOptions)[number],
+  { name: keyof OnboardingFormData; label: string }[]
+> = {
+  INDYCAR: [
+    { name: "indycarOnly", label: "Confirm INDYCAR-only events" },
+    { name: "includeIndycarNxt", label: "Include INDYCAR NXT if applicable" },
+    { name: "acknowledgeScheduleSource", label: "Acknowledge official INDYCAR schedule source" },
+  ],
+  F1: [
+    { name: "f1IncludeSupportSeries", label: "Include F2/F3 support series" },
+    { name: "f1IncludeSprint", label: "Include sprint weekends" },
+    { name: "f1AcknowledgeScheduleSource", label: "Acknowledge FIA schedule source" },
+  ],
+  IMSA: [
+    { name: "imsaIncludeMichelinPilot", label: "Include Michelin Pilot Challenge" },
+    { name: "imsaWeatherTechOnly", label: "Limit to WeatherTech Championship only" },
+    { name: "imsaAcknowledgeScheduleSource", label: "Acknowledge IMSA official schedule source" },
+  ],
+  NASCAR: [
+    { name: "nascarIncludeXfinity", label: "Include Xfinity Series" },
+    { name: "nascarIncludeTruckSeries", label: "Include Craftsman Truck Series" },
+    { name: "nascarAcknowledgeScheduleSource", label: "Acknowledge NASCAR official schedule source" },
+  ],
+  NHRA: [
+    { name: "nhraIncludeSportsman", label: "Include Sportsman categories" },
+    { name: "nhraProOnly", label: "Limit to Professional categories only" },
+    { name: "nhraAcknowledgeScheduleSource", label: "Acknowledge NHRA official schedule source" },
+  ],
+};
+
 export function Step6Events({ form }: StepProps) {
   const experientialEvents = form.watch("experientialEvents") || [];
+  const selectedSeries = form.watch("selectedSeries") || [];
+  const validSelectedSeries = selectedSeries.filter(
+    (series): series is (typeof seriesOptions)[number] =>
+      (seriesOptions as readonly string[]).includes(series),
+  );
 
   return (
     <div className="space-y-6">
@@ -40,69 +78,94 @@ export function Step6Events({ form }: StepProps) {
           Configure event and schedule settings
         </p>
       </div>
-      {/* TODO: Add selector for IndyCar, NHRA, F1, IMSA, NASCAR, etc. and the schedule preferences will need to update accordingly. So F1 schedule preferences will only show when F1 is selected. */}
       <div className="space-y-4">
+        <FormField
+          control={form.control}
+          name="selectedSeries"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Series</FormLabel>
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {seriesOptions.map((series) => {
+                  const checked = field.value?.includes(series);
+                  return (
+                    <div
+                      key={series}
+                      className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
+                      <Checkbox
+                        checked={checked}
+                        onCheckedChange={(isChecked) => {
+                          const current = field.value || [];
+                          if (isChecked) {
+                            field.onChange([...current, series]);
+                          } else {
+                            field.onChange(current.filter((item: string) => item !== series));
+                          }
+                        }}
+                      />
+                      <span className="text-sm">{series}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </FormItem>
+          )}
+        />
+
         <FormLabel>Schedule Preferences</FormLabel>
 
-        <FormField
-          control={form.control}
-          name="indycarOnly"
-          render={({ field }) => (
-            <FormItem className="flex items-start gap-3 space-y-0 p-4 rounded-lg bg-muted/30">
-              <FormControl>
-                <Checkbox
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                />
-              </FormControl>
-              <div>
-                <FormLabel className="cursor-pointer">
-                  Confirm INDYCAR-only events
-                </FormLabel>
-              </div>
-            </FormItem>
-          )}
-        />
+        {validSelectedSeries.length === 0 ? (
+          <p className="text-sm text-muted-foreground">
+            Select at least one series to configure schedule preferences.
+          </p>
+        ) : (
+          <div className="space-y-4">
+            {validSelectedSeries.map((series) => {
+              const preferences = schedulePreferenceConfig[series];
 
-        <FormField
-          control={form.control}
-          name="includeIndycarNxt"
-          render={({ field }) => (
-            <FormItem className="flex items-start gap-3 space-y-0 p-4 rounded-lg bg-muted/30">
-              <FormControl>
-                <Checkbox
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                />
-              </FormControl>
-              <div>
-                <FormLabel className="cursor-pointer">
-                  Include INDYCAR NXT if applicable
-                </FormLabel>
-              </div>
-            </FormItem>
-          )}
-        />
+              if (!preferences) {
+                return null;
+              }
 
-        <FormField
-          control={form.control}
-          name="acknowledgeScheduleSource"
-          render={({ field }) => (
-            <FormItem className="flex items-start gap-3 space-y-0 p-4 rounded-lg bg-muted/30">
-              <FormControl>
-                <Checkbox
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                />
-              </FormControl>
-              <div>
-                <FormLabel className="cursor-pointer">
-                  Acknowledge official INDYCAR schedule source
-                </FormLabel>
-              </div>
-            </FormItem>
-          )}
-        />
+              return (
+                <div
+                  key={series}
+                  className="rounded-lg border border-border/60 bg-muted/20 p-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold">{series} schedule</span>
+                    <span className="text-xs text-muted-foreground">
+                      Preferences apply only when {series} is selected
+                    </span>
+                  </div>
+
+                  {preferences.map(({ name, label }) => (
+                    <FormField
+                      key={name}
+                      control={form.control}
+                      name={name}
+                      render={({ field }) => (
+                        <FormItem className="flex items-start gap-3 space-y-0 p-3 rounded-md bg-muted/30">
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                          <div>
+                            <FormLabel className="cursor-pointer">
+                              {label}
+                            </FormLabel>
+                          </div>
+                        </FormItem>
+                      )}
+                    />
+                  ))}
+                </div>
+              );
+            })}
+          </div>
+        )}
+
       </div>
 
       <FormField

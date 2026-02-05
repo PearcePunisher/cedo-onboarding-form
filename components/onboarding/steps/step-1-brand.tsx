@@ -7,6 +7,7 @@ import { FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessa
 import { Checkbox } from "@/components/ui/checkbox"
 import { Textarea } from "@/components/ui/textarea"
 import { FileUpload } from "@/components/onboarding/file-upload"
+import { Button } from "@/components/ui/button"
 
 interface StepProps {
   form: UseFormReturn<OnboardingFormData>
@@ -16,8 +17,15 @@ export function Step1Brand({ form }: StepProps) {
   const logos = (form.watch("logos") as File[] | undefined) ?? []
   const [previewItems, setPreviewItems] = useState<{ name: string; url: string }[]>([])
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null)
+  const [copiedExample, setCopiedExample] = useState(false)
 
   const imageFiles = useMemo(() => logos.filter((file) => file.type.startsWith("image/")), [logos])
+
+  const exampleGuidelines = useMemo(
+    () =>
+      `Brand: Nimbus Health\nMission: Make healthcare feel simple.\nTone: Confident, optimistic, plain language.\n\n1) Logo usage\n   - Primary logo on light backgrounds; white mark on dark.\n   - Minimum clear space: logo height x0.5; minimum size: 24px height.\n\n2) Colors\n   - Nimbus Blue #1E4B99 (Primary)\n   - Sky Mist #DCE8FF (Secondary)\n   - Coral Accent #FF6B5A (Accent)\n   - Text on light: #0F172A; on dark: #F8FAFC\n\n3) Typography\n   - Heading: Sora Bold (700)\n   - Body: Inter Regular (400)\n   - Buttons: Sora Semibold (600) all-caps letter-spacing 2%\n\n4) Imagery\n   - Use warm, candid care settings; avoid stock with heavy filters.\n\n5) Voice & copy\n   - Lead with outcomes, then how; prefer verbs over adjectives.\n\n6) Do / Don't\n   - Do keep 16px corner radius on cards.\n   - Don't place logo on photographic backgrounds without 60% overlay.\n\n7) File delivery\n   - Provide SVG + PNG @2x; include dark/light variants.\n\nOwner: brand@NimbusHealth.com\nLast updated: 2024-11-12`,
+    []
+  )
 
   useEffect(() => {
     const nextPreviews = imageFiles.map((file) => ({ name: file.name, url: URL.createObjectURL(file) }))
@@ -138,7 +146,46 @@ export function Step1Brand({ form }: StepProps) {
           )}
         />
       </div> */}
-      {/* TODO: Provide the user an example of a correctly formatted brand guideline file or give them a customizer tool to create one. */}
+      <div className="rounded-lg border bg-muted/20 p-4 space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <div className="text-sm font-medium">Need a starting point?</div>
+            <p className="text-xs text-muted-foreground">Use this outline or download it as a template you can edit.</p>
+          </div>
+          <div className="flex gap-2">
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={async () => {
+                try {
+                  await navigator.clipboard.writeText(exampleGuidelines)
+                  setCopiedExample(true)
+                  setTimeout(() => setCopiedExample(false), 1800)
+                } catch (error) {
+                  console.error("Failed to copy brand guideline example", error)
+                }
+              }}
+            >
+              {copiedExample ? "Copied" : "Copy outline"}
+            </Button>
+            <Button
+              size="sm"
+              onClick={() => {
+                const blob = new Blob([exampleGuidelines], { type: "text/markdown" })
+                const url = URL.createObjectURL(blob)
+                const link = document.createElement("a")
+                link.href = url
+                link.download = "brand-guidelines-example.md"
+                link.click()
+                URL.revokeObjectURL(url)
+              }}
+            >
+              Download .md
+            </Button>
+          </div>
+        </div>
+        <pre className="whitespace-pre-wrap rounded-md border bg-background p-3 text-xs leading-relaxed">{exampleGuidelines}</pre>
+      </div>
       <FormField
         control={form.control}
         name="brandGuidelines"

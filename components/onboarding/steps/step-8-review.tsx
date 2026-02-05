@@ -57,16 +57,21 @@ export function Step8Review({ form }: StepProps) {
         </div>
 
         <div className="p-4 rounded-lg bg-muted/30">
-          <h3 className="font-medium mb-3">Driver</h3>
-          <SummaryItem label="Name" value={values.driverName || "Not provided"} />
-          <SummaryItem label="Hometown" value={values.hometown || "Not provided"} />
-          <SummaryItem label="Current residence" value={values.currentResidence || "Not provided"} />
-          <SummaryItem
-            label="Social profiles"
-            value={
-              [values.instagram, values.facebook, values.twitter, values.tiktok].filter(Boolean).length + " provided"
-            }
-          />
+          <h3 className="font-medium mb-3">Drivers</h3>
+          <SummaryItem label="Number of drivers" value={values.drivers?.length || 0} />
+          {values.drivers && values.drivers.length > 0 && (
+            <>
+              <SummaryItem label="Primary driver" value={values.drivers[0].driverName || "Not provided"} />
+              <SummaryItem
+                label="Total social profiles"
+                value={
+                  values.drivers.reduce((total, driver) => {
+                    return total + [driver.instagram, driver.facebook, driver.twitter, driver.tiktok].filter(Boolean).length
+                  }, 0) + " provided"
+                }
+              />
+            </>
+          )}
         </div>
 
         <div className="p-4 rounded-lg bg-muted/30">
