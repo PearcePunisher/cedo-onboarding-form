@@ -4,12 +4,19 @@ import { neon } from "@neondatabase/serverless"
 import { put } from "@vercel/blob"
 import { OnboardingFormData } from "./schema"
 
-async function uploadFiles(files: File[] | null | undefined, prefix: string): Promise<string | null> {
+type UploadableFile = File | string
+
+async function uploadFiles(files: UploadableFile[] | null | undefined, prefix: string): Promise<string | null> {
   if (!files || files.length === 0) return null
   
   const uploadedUrls: string[] = []
   
   for (const file of files) {
+    if (typeof file === "string") {
+      uploadedUrls.push(file)
+      continue
+    }
+
     if (file instanceof File) {
       const blob = await put(`${prefix}/${Date.now()}-${file.name}`, file, {
         access: "public",
@@ -21,8 +28,11 @@ async function uploadFiles(files: File[] | null | undefined, prefix: string): Pr
   return uploadedUrls.length > 0 ? JSON.stringify(uploadedUrls) : null
 }
 
-async function uploadSingleFile(file: File | null | undefined, prefix: string): Promise<string | null> {
-  if (!file || !(file instanceof File)) return null
+async function uploadSingleFile(file: UploadableFile | null | undefined, prefix: string): Promise<string | null> {
+  if (!file) return null
+
+  if (typeof file === "string") return file
+  if (!(file instanceof File)) return null
   
   const blob = await put(`${prefix}/${Date.now()}-${file.name}`, file, {
     access: "public",
@@ -31,7 +41,7 @@ async function uploadSingleFile(file: File | null | undefined, prefix: string): 
   return blob.url
 }
 
-export async function submitOnboardingForm(data: OnboardingFormData) {
+export async function submitOnboardingForm(data: OnboardingFormData, providedReferenceId?: string) {
   console.log("Server Action called - starting submission...")
   
   try {
@@ -44,7 +54,9 @@ export async function submitOnboardingForm(data: OnboardingFormData) {
     console.log("Database connection initialized")
 
     // Generate reference ID
-    const referenceId = `CEDO-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`
+    const referenceId =
+      providedReferenceId ??
+      `CEDO-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`
     console.log("Generated reference ID:", referenceId)
 
     // Upload files to Vercel Blob Storage

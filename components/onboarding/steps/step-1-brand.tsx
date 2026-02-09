@@ -186,7 +186,7 @@ export function Step1Brand({ form }: StepProps) {
           </FormItem>
         )}
       />
-
+      {/* TODO: fix unable to remove uploaded PDF by pressing the X icon. Does work with images. */}
       <FormField
         control={form.control}
         name="brandNotes"

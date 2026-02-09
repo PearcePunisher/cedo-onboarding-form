@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { ChevronLeft, ChevronRight, Send } from "lucide-react"
+import { upload } from "@vercel/blob/client"
 import { onboardingSchema, type OnboardingFormData } from "@/lib/schema"
 import { submitOnboardingForm } from "../../lib/actions"
 import { Form } from "@/components/ui/form"
@@ -30,11 +31,16 @@ type OnboardingFormProps = {
   enableDraft?: boolean
 }
 
+type UploadableFile = File | string
+type UploadableSingle = UploadableFile | null | undefined
+type UploadableMany = UploadableFile[] | null | undefined
+
 export function OnboardingForm({ enableDraft = false }: OnboardingFormProps) {
   const [currentStep, setCurrentStep] = useState(1)
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [referenceId, setReferenceId] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [uploadStatus, setUploadStatus] = useState("")
 
   const form = useForm<OnboardingFormData>({
     resolver: zodResolver(onboardingSchema),
@@ -187,6 +193,123 @@ export function OnboardingForm({ enableDraft = false }: OnboardingFormProps) {
     }
   }
 
+  const generateReferenceId = () =>
+    `CEDO-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`
+
+  const countFilesToUpload = (data: OnboardingFormData): number => {
+    let count = 0
+
+    const addFiles = (file: UploadableSingle | UploadableMany) => {
+      if (!file) return
+      if (Array.isArray(file)) {
+        file.forEach((item) => {
+          if (item instanceof File) count += 1
+        })
+        return
+      }
+      if (file instanceof File) count += 1
+    }
+
+    addFiles(data.logos)
+    addFiles(data.brandGuidelines)
+    addFiles(data.carImages)
+    addFiles(data.eventPhotography)
+    data.photographyTypeAssets?.forEach((asset) => addFiles(asset.files))
+    data.drivers?.forEach((driver) => {
+      addFiles(driver.headshot)
+      addFiles(driver.heroImage)
+    })
+    data.tracks?.forEach((track) => addFiles(track.trackImages))
+    data.experientialEvents?.forEach((event) => addFiles(event.images))
+    data.ownership?.forEach((owner) => addFiles(owner.headshot))
+    data.staff?.forEach((member) => addFiles(member.headshot))
+
+    return count
+  }
+
+  const uploadFormFiles = async (data: OnboardingFormData, submissionReferenceId: string): Promise<OnboardingFormData> => {
+    const totalFiles = countFilesToUpload(data)
+    let uploadedFiles = 0
+
+    const uploadSingle = async (file: UploadableSingle, prefix: string): Promise<string | null> => {
+      if (!file) return null
+      if (typeof file === "string") return file
+      if (!(file instanceof File)) return null
+
+      setUploadStatus(`Uploading file ${uploadedFiles + 1} of ${totalFiles}: ${file.name}`)
+      const safeFileName = file.name.replace(/[^\w.-]+/g, "-")
+      const pathName = `${prefix}/${Date.now()}-${safeFileName}`
+      const blob = await upload(pathName, file, {
+        access: "public",
+        handleUploadUrl: "/api/blob/upload",
+        multipart: file.size > 8 * 1024 * 1024,
+      })
+      uploadedFiles += 1
+      return blob.url
+    }
+
+    const uploadMany = async (files: UploadableMany, prefix: string): Promise<string[]> => {
+      if (!files || files.length === 0) return []
+      const urls: string[] = []
+      for (const file of files) {
+        const url = await uploadSingle(file, prefix)
+        if (url) urls.push(url)
+      }
+      return urls
+    }
+
+    return {
+      ...data,
+      logos: await uploadMany(data.logos, `onboarding/${submissionReferenceId}/logos`),
+      brandGuidelines: await uploadSingle(data.brandGuidelines, `onboarding/${submissionReferenceId}/brand-guidelines`),
+      carImages: await uploadMany(data.carImages, `onboarding/${submissionReferenceId}/car-images`),
+      eventPhotography: await uploadMany(data.eventPhotography, `onboarding/${submissionReferenceId}/event-photography`),
+      photographyTypeAssets:
+        (await Promise.all(
+          (data.photographyTypeAssets ?? []).map(async (asset) => ({
+            ...asset,
+            files: await uploadMany(asset.files, `onboarding/${submissionReferenceId}/photography/${asset.type}`),
+          })),
+        )) ?? [],
+      drivers:
+        (await Promise.all(
+          (data.drivers ?? []).map(async (driver) => ({
+            ...driver,
+            headshot: await uploadSingle(driver.headshot, `onboarding/${submissionReferenceId}/drivers/headshots`),
+            heroImage: await uploadSingle(driver.heroImage, `onboarding/${submissionReferenceId}/drivers/hero-images`),
+          })),
+        )) ?? [],
+      tracks:
+        (await Promise.all(
+          (data.tracks ?? []).map(async (track) => ({
+            ...track,
+            trackImages: await uploadMany(track.trackImages, `onboarding/${submissionReferenceId}/tracks`),
+          })),
+        )) ?? [],
+      experientialEvents:
+        (await Promise.all(
+          (data.experientialEvents ?? []).map(async (event) => ({
+            ...event,
+            images: await uploadMany(event.images, `onboarding/${submissionReferenceId}/experiential-events`),
+          })),
+        )) ?? [],
+      ownership:
+        (await Promise.all(
+          (data.ownership ?? []).map(async (owner) => ({
+            ...owner,
+            headshot: await uploadSingle(owner.headshot, `onboarding/${submissionReferenceId}/ownership`),
+          })),
+        )) ?? [],
+      staff:
+        (await Promise.all(
+          (data.staff ?? []).map(async (member) => ({
+            ...member,
+            headshot: await uploadSingle(member.headshot, `onboarding/${submissionReferenceId}/staff`),
+          })),
+        )) ?? [],
+    }
+  }
+
   // Calculate total file size in MB
   const calculateTotalFileSize = (data: OnboardingFormData): number => {
     let totalSize = 0
@@ -234,32 +357,21 @@ export function OnboardingForm({ enableDraft = false }: OnboardingFormProps) {
   const onSubmit = async (data: OnboardingFormData) => {
     try {
       setIsSubmitting(true)
-      
-      // Check total payload size
       const totalSizeMB = calculateTotalFileSize(data)
       console.log(`Total file size: ${totalSizeMB.toFixed(2)}MB`)
-      
-      if (totalSizeMB > 9) { // Leave some headroom (10MB limit, warn at 9MB)
-        const proceed = confirm(
-          `Warning: Your total file size is ${totalSizeMB.toFixed(2)}MB, which is near the 10MB limit.\n\n` +
-          `This may cause the submission to fail. Consider:\n` +
-          `• Reducing image file sizes using compression\n` +
-          `• Uploading fewer images\n` +
-          `• Using lower resolution images\n\n` +
-          `Do you want to try submitting anyway?`
-        )
-        
-        if (!proceed) {
-          setIsSubmitting(false)
-          return
-        }
-      }
-      
-      // Log full payload to console
-      console.log("Onboarding Form Submission:", data)
 
-      // Submit to database
-      const result = await submitOnboardingForm(data)
+      const submissionReferenceId = generateReferenceId()
+      const totalFiles = countFilesToUpload(data)
+      if (totalFiles > 0) {
+        setUploadStatus(`Preparing ${totalFiles} files for upload...`)
+      } else {
+        setUploadStatus("Submitting form data...")
+      }
+
+      const preparedData = await uploadFormFiles(data, submissionReferenceId)
+
+      setUploadStatus("Finalizing submission...")
+      const result = await submitOnboardingForm(preparedData, submissionReferenceId)
 
       if (result.success && result.referenceId) {
         setReferenceId(result.referenceId)
@@ -268,33 +380,15 @@ export function OnboardingForm({ enableDraft = false }: OnboardingFormProps) {
           localStorage.removeItem(DRAFT_STORAGE_KEY)
         }
       } else {
-        // Handle error - you might want to show a toast notification
         console.error("Submission failed:", result.error)
-        
-        if (result.error?.includes("payload") || result.error?.includes("413") || result.error?.includes("too large")) {
-          alert(
-            "Upload failed: File size too large.\n\n" +
-            `Total size: ${totalSizeMB.toFixed(2)}MB\n\n` +
-            "Please reduce your file sizes and try again."
-          )
-        } else {
-          alert("Failed to submit form. Please try again.")
-        }
+        alert("Failed to submit form. Please try again.")
       }
     } catch (error) {
       console.error("Submission error:", error)
-      const errorMessage = error instanceof Error ? error.message : String(error)
-      
-      if (errorMessage.includes("payload") || errorMessage.includes("413") || errorMessage.includes("too large")) {
-        alert(
-          "Upload failed: Total file size exceeds the limit.\n\n" +
-          "Please compress your images or upload fewer files."
-        )
-      } else {
-        alert("An error occurred while submitting the form. Please try again.")
-      }
+      alert("An error occurred while uploading files or submitting the form. Please try again.")
     } finally {
       setIsSubmitting(false)
+      setUploadStatus("")
     }
   }
 
@@ -387,6 +481,7 @@ export function OnboardingForm({ enableDraft = false }: OnboardingFormProps) {
                   )}
                 </div>
               </div>
+              {isSubmitting && uploadStatus ? <p className="mt-3 text-sm text-muted-foreground">{uploadStatus}</p> : null}
             </form>
           </Form>
         </CardContent>
