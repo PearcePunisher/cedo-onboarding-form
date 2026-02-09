@@ -41,6 +41,7 @@ export function OnboardingForm({ enableDraft = false }: OnboardingFormProps) {
   const [referenceId, setReferenceId] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [uploadStatus, setUploadStatus] = useState("")
+  const [uploadProgress, setUploadProgress] = useState(0)
 
   const form = useForm<OnboardingFormData>({
     resolver: zodResolver(onboardingSchema),
@@ -243,8 +244,17 @@ export function OnboardingForm({ enableDraft = false }: OnboardingFormProps) {
         access: "public",
         handleUploadUrl: "/api/blob/upload",
         multipart: file.size > 8 * 1024 * 1024,
+        onUploadProgress: (progress) => {
+          if (totalFiles === 0) return
+          const completedPercent = (uploadedFiles / totalFiles) * 100
+          const currentFilePercent = progress.percentage / totalFiles
+          setUploadProgress(Math.min(99, completedPercent + currentFilePercent))
+        },
       })
       uploadedFiles += 1
+      if (totalFiles > 0) {
+        setUploadProgress(Math.min(99, (uploadedFiles / totalFiles) * 100))
+      }
       return blob.url
     }
 
@@ -357,6 +367,7 @@ export function OnboardingForm({ enableDraft = false }: OnboardingFormProps) {
   const onSubmit = async (data: OnboardingFormData) => {
     try {
       setIsSubmitting(true)
+      setUploadProgress(0)
       const totalSizeMB = calculateTotalFileSize(data)
       console.log(`Total file size: ${totalSizeMB.toFixed(2)}MB`)
 
@@ -371,9 +382,11 @@ export function OnboardingForm({ enableDraft = false }: OnboardingFormProps) {
       const preparedData = await uploadFormFiles(data, submissionReferenceId)
 
       setUploadStatus("Finalizing submission...")
+      setUploadProgress(99)
       const result = await submitOnboardingForm(preparedData, submissionReferenceId)
 
       if (result.success && result.referenceId) {
+        setUploadProgress(100)
         setReferenceId(result.referenceId)
         setIsSubmitted(true)
         if (enableDraft && typeof window !== "undefined") {
@@ -389,6 +402,17 @@ export function OnboardingForm({ enableDraft = false }: OnboardingFormProps) {
     } finally {
       setIsSubmitting(false)
       setUploadStatus("")
+      setUploadProgress(0)
+    }
+  }
+
+  const handleFormKeyDown = (event: React.KeyboardEvent<HTMLFormElement>) => {
+    if (event.key !== "Enter" || currentStep === TOTAL_STEPS) return
+
+    const target = event.target as HTMLElement
+    const tagName = target.tagName.toLowerCase()
+    if (tagName !== "textarea") {
+      event.preventDefault()
     }
   }
 
@@ -442,7 +466,7 @@ export function OnboardingForm({ enableDraft = false }: OnboardingFormProps) {
       <Card className="border-border bg-card">
         <CardContent className="p-6 sm:p-8">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)}>
+            <form onSubmit={form.handleSubmit(onSubmit)} onKeyDown={handleFormKeyDown}>
               {renderStep()}
 
               <div className="flex justify-between mt-8 pt-6 border-t border-border">
@@ -469,19 +493,30 @@ export function OnboardingForm({ enableDraft = false }: OnboardingFormProps) {
                   </Button>
 
                   {currentStep === TOTAL_STEPS ? (
-                    <Button type="submit" className="gap-2" disabled={isSubmitting}>
+                    <Button key="submit-step-button" type="submit" className="gap-2" disabled={isSubmitting}>
                       {isSubmitting ? "Submitting..." : "Submit"}
                       <Send className="w-4 h-4" />
                     </Button>
                   ) : (
-                    <Button type="button" onClick={handleNext} className="gap-2">
+                    <Button key="continue-step-button" type="button" onClick={handleNext} className="gap-2">
                       Continue
                       <ChevronRight className="w-4 h-4" />
                     </Button>
                   )}
                 </div>
               </div>
-              {isSubmitting && uploadStatus ? <p className="mt-3 text-sm text-muted-foreground">{uploadStatus}</p> : null}
+              {isSubmitting ? (
+                <div className="mt-4 space-y-2">
+                  {uploadStatus ? <p className="text-sm text-muted-foreground">{uploadStatus}</p> : null}
+                  <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+                    <div
+                      className="h-full bg-primary transition-all duration-150 ease-out"
+                      style={{ width: `${Math.max(0, Math.min(100, uploadProgress))}%` }}
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground">{Math.round(uploadProgress)}%</p>
+                </div>
+              ) : null}
             </form>
           </Form>
         </CardContent>
