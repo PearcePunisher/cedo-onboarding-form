@@ -26,7 +26,7 @@ function SummaryItem({ label, value }: { label: string; value: React.ReactNode }
   )
 }
 
-function BooleanIndicator({ value }: { value: boolean }) {
+function BooleanIndicator({ value }: { value: boolean | undefined }) {
   return value ? <Check className="w-4 h-4 text-green-500" /> : <X className="w-4 h-4 text-muted-foreground" />
 }
 
