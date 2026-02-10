@@ -40,6 +40,7 @@ export function OnboardingForm({ enableDraft = false }: OnboardingFormProps) {
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [referenceId, setReferenceId] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isSavingDraft, setIsSavingDraft] = useState(false)
   const [uploadStatus, setUploadStatus] = useState("")
   const [uploadProgress, setUploadProgress] = useState(0)
 
@@ -97,22 +98,39 @@ export function OnboardingForm({ enableDraft = false }: OnboardingFormProps) {
   })
 
   const sanitizeDraftData = (data: OnboardingFormData): OnboardingFormData => {
+    const keepUploadedSingle = (value: UploadableSingle): string | undefined => {
+      if (typeof value === "string") return value
+      return undefined
+    }
+
+    const keepUploadedMany = (value: UploadableMany): string[] => {
+      if (!value) return []
+      return value.filter((item): item is string => typeof item === "string")
+    }
+
     const stripFileFields = <T extends Record<string, any>>(items: T[] | undefined, keys: (keyof T)[]) =>
       items?.map((item) => {
         const copy = { ...item }
         keys.forEach((key) => {
-          if (key in copy) copy[key] = undefined
+          if (!(key in copy)) return
+          const value = copy[key]
+          if (Array.isArray(value)) {
+            copy[key] = keepUploadedMany(value) as T[keyof T]
+            return
+          }
+          copy[key] = keepUploadedSingle(value as UploadableSingle) as T[keyof T]
         })
         return copy as T
       }) ?? []
 
     return {
       ...data,
-      logos: [],
-      brandGuidelines: undefined,
-      carImages: [],
-      eventPhotography: [],
-      photographyTypeAssets: data.photographyTypeAssets?.map((asset) => ({ type: asset.type, files: [] })) ?? [],
+      logos: keepUploadedMany(data.logos),
+      brandGuidelines: keepUploadedSingle(data.brandGuidelines),
+      carImages: keepUploadedMany(data.carImages),
+      eventPhotography: keepUploadedMany(data.eventPhotography),
+      photographyTypeAssets:
+        data.photographyTypeAssets?.map((asset) => ({ type: asset.type, files: keepUploadedMany(asset.files) })) ?? [],
       drivers: stripFileFields(data.drivers, ["headshot", "heroImage"]),
       tracks: stripFileFields(data.tracks, ["trackImages"]),
       experientialEvents: stripFileFields(data.experientialEvents, ["images"]),
@@ -121,18 +139,43 @@ export function OnboardingForm({ enableDraft = false }: OnboardingFormProps) {
     }
   }
 
-  const saveDraft = (options?: { silent?: boolean }) => {
+  const saveDraft = async (options?: { silent?: boolean; includeFiles?: boolean }) => {
     if (!enableDraft || typeof window === "undefined") return
 
-    const draft = {
-      data: sanitizeDraftData(form.getValues()),
-      currentStep,
-      savedAt: new Date().toISOString(),
-    }
+    try {
+      const includeFiles = options?.includeFiles ?? false
+      let dataToSave = sanitizeDraftData(form.getValues())
 
-    localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draft))
-    if (!options?.silent) {
-      alert("Your progress has been saved. You can safely return later to continue.")
+      if (includeFiles) {
+        setIsSavingDraft(true)
+        setUploadProgress(0)
+        setUploadStatus("Preparing files for draft save...")
+        const draftReferenceId = `DRAFT-${Date.now().toString(36).toUpperCase()}`
+        const dataWithUploadedFiles = await uploadFormFiles(form.getValues(), `drafts/${draftReferenceId}`)
+        dataToSave = dataWithUploadedFiles
+        form.reset(dataWithUploadedFiles)
+        setUploadProgress(100)
+      }
+
+      const draft = {
+        data: dataToSave,
+        currentStep,
+        savedAt: new Date().toISOString(),
+      }
+
+      localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draft))
+      if (!options?.silent) {
+        alert("Your progress has been saved. You can safely return later to continue.")
+      }
+    } catch (error) {
+      console.error("Failed to save draft", error)
+      if (!options?.silent) {
+        alert("Failed to save draft. Please try again.")
+      }
+    } finally {
+      setUploadStatus("")
+      setUploadProgress(0)
+      setIsSavingDraft(false)
     }
   }
 
@@ -179,7 +222,7 @@ export function OnboardingForm({ enableDraft = false }: OnboardingFormProps) {
     }
 
     // Save progress before advancing to ensure previous step data is persisted
-    saveDraft({ silent: true })
+    void saveDraft({ silent: true, includeFiles: false })
 
     if (currentStep < TOTAL_STEPS) {
       setCurrentStep((prev) => prev + 1)
@@ -189,7 +232,7 @@ export function OnboardingForm({ enableDraft = false }: OnboardingFormProps) {
   const handleBack = () => {
     if (currentStep > 1) {
       // Save current state before moving back
-      saveDraft({ silent: true })
+      void saveDraft({ silent: true, includeFiles: false })
       setCurrentStep((prev) => prev - 1)
     }
   }
@@ -485,11 +528,11 @@ export function OnboardingForm({ enableDraft = false }: OnboardingFormProps) {
                   <Button
                     type="button"
                     variant="outline"
-                    onClick={saveDraft}
+                    onClick={() => void saveDraft({ includeFiles: true })}
                     className="gap-2"
-                    disabled={!enableDraft}
+                    disabled={!enableDraft || isSubmitting || isSavingDraft}
                   >
-                    Save & Continue Later
+                    {isSavingDraft ? "Saving..." : "Save & Continue Later"}
                   </Button>
 
                   {currentStep === TOTAL_STEPS ? (
@@ -505,7 +548,7 @@ export function OnboardingForm({ enableDraft = false }: OnboardingFormProps) {
                   )}
                 </div>
               </div>
-              {isSubmitting ? (
+              {isSubmitting || isSavingDraft ? (
                 <div className="mt-4 space-y-2">
                   {uploadStatus ? <p className="text-sm text-muted-foreground">{uploadStatus}</p> : null}
                   <div className="h-2 w-full overflow-hidden rounded-full bg-muted">

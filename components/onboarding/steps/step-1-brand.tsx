@@ -14,12 +14,20 @@ interface StepProps {
 }
 
 export function Step1Brand({ form }: StepProps) {
-  const logos = (form.watch("logos") as File[] | undefined) ?? []
-  const [previewItems, setPreviewItems] = useState<{ name: string; url: string }[]>([])
+  const logos = (form.watch("logos") as (File | string)[] | undefined) ?? []
+  const [previewItems, setPreviewItems] = useState<{ name: string; url: string; fromObjectUrl: boolean }[]>([])
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null)
   const [copiedExample, setCopiedExample] = useState(false)
 
-  const imageFiles = useMemo(() => logos.filter((file) => file.type.startsWith("image/")), [logos])
+  const imageFiles = useMemo(
+    () =>
+      logos.filter((file) => {
+        if (file instanceof File) return file.type.startsWith("image/")
+        const normalized = file.split("?")[0].toLowerCase()
+        return [".png", ".jpg", ".jpeg", ".gif", ".webp", ".avif", ".svg", ".bmp"].some((ext) => normalized.endsWith(ext))
+      }),
+    [logos],
+  )
 
   const exampleGuidelines = useMemo(
     () =>
@@ -28,11 +36,22 @@ export function Step1Brand({ form }: StepProps) {
   )
 
   useEffect(() => {
-    const nextPreviews = imageFiles.map((file) => ({ name: file.name, url: URL.createObjectURL(file) }))
+    const nextPreviews = imageFiles.map((file) => {
+      if (file instanceof File) {
+        return { name: file.name, url: URL.createObjectURL(file), fromObjectUrl: true }
+      }
+
+      const withoutQuery = file.split("?")[0]
+      const segments = withoutQuery.split("/")
+      const name = decodeURIComponent(segments[segments.length - 1] || "uploaded-image")
+      return { name, url: file, fromObjectUrl: false }
+    })
     setPreviewItems(nextPreviews)
 
     return () => {
-      nextPreviews.forEach((item) => URL.revokeObjectURL(item.url))
+      nextPreviews.forEach((item) => {
+        if (item.fromObjectUrl) URL.revokeObjectURL(item.url)
+      })
     }
   }, [imageFiles])
 

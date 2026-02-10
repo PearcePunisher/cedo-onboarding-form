@@ -10,8 +10,8 @@ import { cn } from "@/lib/utils"
 interface FileUploadProps {
   accept?: string
   multiple?: boolean
-  onChange: (files: File[]) => void
-  value?: File[]
+  onChange: (files: (File | string)[]) => void
+  value?: (File | string)[]
   label?: string
   maxSize?: number // in bytes
   maxSizeMB?: number // for display purposes'
@@ -107,7 +107,24 @@ export function FileUpload({ accept, multiple = false, onChange, value = [], lab
     [onChange, value],
   )
 
-  const isImage = (file: File) => file.type.startsWith("image/")
+  const isImage = (file: File | string) => {
+    if (typeof file === "string") {
+      const normalized = file.split("?")[0].toLowerCase()
+      return [".png", ".jpg", ".jpeg", ".gif", ".webp", ".avif", ".svg", ".bmp"].some((ext) => normalized.endsWith(ext))
+    }
+
+    return file.type.startsWith("image/")
+  }
+
+  const getFileName = (file: File | string) => {
+    if (typeof file === "string") {
+      const withoutQuery = file.split("?")[0]
+      const segments = withoutQuery.split("/")
+      return decodeURIComponent(segments[segments.length - 1] || "uploaded-file")
+    }
+
+    return file.name
+  }
 
   return (
     <div className="space-y-3">
@@ -155,7 +172,7 @@ export function FileUpload({ accept, multiple = false, onChange, value = [], lab
               ) : (
                 <File className="w-5 h-5 text-muted-foreground" />
               )}
-              <span className="flex-1 text-sm truncate">{file.name}</span>
+              <span className="flex-1 text-sm truncate">{getFileName(file)}</span>
               <Button type="button" variant="ghost" size="icon" className="h-6 w-6" onClick={() => removeFile(index)}>
                 <X className="w-4 h-4" />
               </Button>
