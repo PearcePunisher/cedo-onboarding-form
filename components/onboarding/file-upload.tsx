@@ -18,7 +18,7 @@ interface FileUploadProps {
   inputId?: string
 }
 
-export function FileUpload({ accept, multiple = false, onChange, value = [], label, maxSize = 50 * 1024 * 1024, maxSizeMB = 50, inputId, }: FileUploadProps) {
+export function FileUpload({ accept, multiple = false, onChange, value = [], label, maxSize = 50 * 1024 * 1024, maxSizeMB = 5, inputId, }: FileUploadProps) {
   const [isDragging, setIsDragging] = useState(false)
   const [error, setError] = useState<string | null>(null)
   //console.log("Index value (inputId)")
